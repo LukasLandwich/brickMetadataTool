@@ -1,0 +1,218 @@
+@prefix brick: <https://brickschema.org/schema/1.1/Brick#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix tag: <https://brickschema.org/schema/1.1/BrickTag#> .
+@prefix unit: <http://qudt.org/vocab/unit/> .
+@prefix ex: <urn:brick#> .
+
+# Spatial elements
+ex:Site   a   brick:Site ;
+    brick:hasPart   ex:Building ;
+.
+
+ex:Building a   brick:Building ;
+    brick:hasPart   ex:Floor ;
+.
+
+ex:Floor    a   brick:Floor ;
+    brick:hasPart   ex:HVAC_Zone_1, ex:HVAC_Zone_2, ex:Open_Office,
+                    ex:Bathroom, ex:Private_Office, ex:Kitchenette, ex:Corridor,
+                    ex:Lighting_Zone_OO1, ex:Lighting_Zone_OO2, ex:Lighting_Zone_Bathroom, 
+                    ex:Lighting_Zone_PO, ex:Lighting_Zone_Kitchenette, ex:Lighting_Zone_Corridor ;
+.
+
+ex:Open_Office a brick:Room .
+ex:Bathroom a brick:Room .
+ex:Private_Office a brick:Room .
+ex:Kitchenette a brick:Room .
+ex:Corridor a brick:Space .
+
+ex:HVAC_Zone_1  a   brick:HVAC_Zone ;
+    brick:hasPart  ex:Open_Office, ex:Bathroom, ex:Corridor, ex:Private_Office ;
+.
+
+ex:HVAC_Zone_2  a   brick:HVAC_Zone ;
+    brick:hasPart  ex:Kitchenette, ex:Corridor ;
+.
+
+
+# Lighting elements
+ex:OO_Lighting_1_Sensor a brick:Illuminance_Sensor .
+ex:OO_Lighting_2_Sensor a brick:Illuminance_Sensor .
+ex:Bathroom_Lighting_Sensor a brick:Illuminance_Sensor .
+ex:Private_Office_Lighting_Sensor a brick:Illuminance_Sensor .
+ex:Kitchenette_Lighting_Sensor a brick:Illuminance_Sensor .
+ex:Corridor_Lighting_Sensor a brick:Illuminance_Sensor .
+
+ex:OO_Lighting_1 a brick:Luminaire ;
+    brick:hasPoint  ex:OO_Lighting_1_Sensor ;
+.
+ex:OO_Lighting_2 a brick:Luminaire ;
+    brick:hasPoint  ex:OO_Lighting_2_Sensor ;
+.
+ex:Bathroom_Lighting a brick:Luminaire ;
+    brick:hasPoint  ex:Bathroom_Lighting_Sensor ;
+.
+ex:Private_Office_Lighting a brick:Luminaire ;
+    brick:hasPoint  ex:Private_Office_Lighting_Sensor ;
+.
+ex:Kitchenette_Lighting a brick:Luminaire ;
+    brick:hasPoint  ex:Kitchenette_Lighting_Sensor ;
+.
+ex:Corridor_Lighting a brick:Luminaire ;
+    brick:hasPoint  ex:Corridor_Lighting_Sensor ;
+.
+
+ex:Lighting_Zone_OO1 a brick:Lighting_Zone ;
+    brick:isFedBy ex:OO_Lighting_1 ;
+    brick:isPartOf ex:Open_Office ;
+.
+ex:Lighting_Zone_OO2 a brick:Lighting_Zone ;
+    brick:isFedBy ex:OO_Lighting_2 ;
+    brick:isPartOf ex:Open_Office ;
+.
+ex:Lighting_Zone_Bathroom a brick:Lighting_Zone ;
+    brick:isFedBy ex:Bathroom_Lighting ;
+    brick:isPartOf ex:Bathroom ;
+.
+ex:Lighting_Zone_Private_Office a brick:Lighting_Zone ;
+    brick:isFedBy ex:Private_Office_Lighting ;
+    brick:isPartOf ex:Private_Office ;
+.
+ex:Lighting_Zone_Kitchenette a brick:Lighting_Zone ;
+    brick:isFedBy ex:Kitchenette_Lighting ;
+    brick:isPartOf ex:Kitchenette ;
+.
+ex:Lighting_Zone_Corridor a brick:Lighting_Zone ;
+    brick:isFedBy ex:Corridor_Lighting ;
+    brick:isPartOf ex:Corridor ;
+.
+
+# VAVs
+ex:VAV_Box_1 a brick:VAV ;
+    brick:hasPoint ex:SATS_1, ex:SATSP_1 ;
+    brick:hasPart  ex:Damper_1, ex:Heating_Coil_1 ;
+    brick:feeds ex:HVAC_Zone_1 ;
+.
+ex:SATS_1 a brick:Supply_Air_Temperature_Sensor .
+ex:SATSP_1 a brick:Supply_Air_Temperature_Setpoint .
+ex:Damper_1 a brick:Damper ;
+    brick:hasPoint ex:Damper_1_Position ;
+.
+ex:Damper_1_Position    a   brick:Damper_Position_Command .
+ex:Heating_Coil_1 a brick:Heating_Coil ;
+    brick:hasPart ex:Heating_Valve_1 ;
+.
+ex:Heating_Valve_1  a   brick:Heating_Valve ;
+    brick:hasPoint  ex:Valve_Command_1 ;
+.
+ex:Valve_Command_1  a   brick:Valve_Command .
+
+ex:VAV_Box_2 a brick:VAV ;
+    brick:hasPoint ex:SATS_2, ex:SATSP_2 ;
+    brick:hasPart  ex:Damper_2, ex:Heating_Coil_2 ;
+    brick:feeds ex:HVAC_Zone_2 ;
+.
+ex:SATS_2 a brick:Supply_Air_Temperature_Sensor .
+ex:SATSP_2 a brick:Supply_Air_Temperature_Setpoint .
+ex:Damper_2 a brick:Damper ;
+    brick:hasPoint ex:Damper_2_Position ;
+.
+ex:Damper_2_Position    a   brick:Damper_Position_Command .
+ex:Heating_Coil_2 a brick:Heating_Coil ;
+    brick:hasPart ex:Heating_Valve_2 ;
+.
+ex:Heating_Valve_2  a   brick:Heating_Valve ;
+    brick:hasPoint  ex:Valve_Command_2 ;
+.
+ex:Valve_Command_2  a   brick:Valve_Command .
+
+
+ex:Exhaust_Fan_1 a brick:Exhaust_Fan ;
+    brick:isFedBy ex:Bathroom ;
+.
+
+# AHU
+ex:AHU  a brick:AHU ;
+    brick:hasPart   ex:Supply_Fan, ex:Return_Fan,
+                    ex:Cooling_Coil, ex:Heating_Coil, ex:Filter, 
+                    ex:Outside_Damper, ex:Mixed_Damper, ex:Exhaust_Damper ;
+    brick:feeds ex:VAV_Box_1, ex:VAV_Box_2 ;
+    brick:isFedBy ex:HVAC_Zone_1 ;
+    brick:hasPoint  ex:OATS, ex:RATS, ex:MATS, ex:SATS, 
+                    ex:pre_hc_temp, ex:pre_cc_temp,
+                    ex:RAFS, ex:SAFS ;
+.
+ex:OATS a brick:Outside_Air_Temperature_Sensor .
+ex:RATS a brick:Return_Air_Temperature_Sensor .
+ex:MATS a brick:Mixed_Air_Temperature_Sensor .
+ex:SATS a brick:Supply_Air_Temperature_Sensor .
+ex:pre_hc_temp a brick:Temperature_Sensor .
+ex:pre_cc_temp a brick:Temperature_Sensor .
+ex:SAFS a brick:Supply_Air_Flow_Sensor .
+ex:RAFS a brick:Return_Air_Flow_Sensor .
+
+ex:Supply_Fan a brick:Supply_Fan ;
+    brick:hasPoint  ex:SF_Speed ;
+.
+ex:SF_Speed a brick:Frequency_Command .
+
+ex:Return_Fan a brick:Return_Fan ;
+    brick:hasPoint  ex:SF_Speed ;
+.
+ex:RF_Speed a brick:Frequency_Command .
+
+ex:Cooling_Coil a brick:Cooling_Coil ;
+    brick:hasPoint ex:CC_Valve ;
+.
+ex:CC_Valve a brick:Cooling_Valve ;
+    brick:hasPoint  ex:CC_Valve_CMD ;
+.
+ex:CC_Valve_CMD a brick:Valve_Command ;
+.
+ex:Heating_Coil a brick:Heating_Coil ;
+    brick:hasPoint ex:HC_Valve ;
+.
+ex:HC_Valve a brick:Heating_Valve ;
+    brick:hasPoint  ex:HC_Valve_CMD ;
+.
+ex:HC_Valve_CMD a brick:Valve_Command ;
+.
+
+ex:Filter a brick:Filter .
+
+ex:Outside_Damper a brick:Damper ;
+    brick:hasPoint ex:Outside_Damper_Command ;
+.
+ex:Outside_Damper_Command a brick:Damper_Position_Command .
+ex:Mixed_Damper a brick:Damper ;
+    brick:hasPoint ex:Mixed_Damper_Command ;
+.
+ex:Mixed_Damper_Command a brick:Damper_Position_Command .
+ex:Exhaust_Damper a brick:Damper ;
+    brick:hasPoint ex:Exhaust_Damper_Command ;
+.
+ex:Exhaust_Damper_Command a brick:Damper_Position_Command .
+
+
+# controller
+ex:Controller a brick:Controller ;
+    brick:controls ex:RF_Speed ;
+    brick:hasInput ex:RAFS ;
+.
+
+# internal topology of AHU
+ex:RATS brick:feeds ex:Return_Fan .
+ex:Return_Fan brick:feeds ex:RAFS .
+ex:RAFS brick:feeds ex:Exhaust_Damper, ex:Mixed_Damper .
+ex:Mixed_Damper brick:feeds ex:MATS .
+ex:Outside_Damper brick:feeds ex:MATS .
+ex:MATS brick:feeds ex:Filter .
+ex:Filter brick:feeds ex:pre_hc_temp .
+ex:pre_hc_temp brick:feeds ex:Heating_Coil .
+ex:Heating_Coil brick:feeds ex:pre_cc_temp .
+ex:pre_cc_temp brick:feeds ex:Cooling_Coil .
+ex:Cooling_Coil brick:feeds ex:SATS .
+ex:SATS brick:feeds ex:Supply_Fan .
+ex:Supply_Fan brick:feeds ex:SAFS .
