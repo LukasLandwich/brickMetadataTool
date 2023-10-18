@@ -23,3 +23,6 @@ htmlcov/
 .coverage
 .coverage.*
 *,cover
+
+#Bootstrap ingores
+node_modules
