@@ -1,10 +1,7 @@
-#app.secret_key = os.urandom(24)
-#port = int(os.environ.get('PORT', 5000))
-#app.run(host='0.0.0.0', port=port)
 from neo4j import GraphDatabase
 import brickschema
 
-class HelloWorldExample:
+class Neo4JConnector:
 
     def __init__(self, uri, user, password):
         self.driver = GraphDatabase.driver(uri, auth=(user, password))
@@ -23,7 +20,7 @@ class HelloWorldExample:
                         "SET a.message = $message "
                         "RETURN a.message + ', from node ' + id(a)", message=message)
         return result.single()[0]
-
+'''
 class BrickAdapter:
     # creates a new rdflib.Graph with a recent version of the Brick ontology
     # preloaded.
@@ -63,9 +60,4 @@ class BrickAdapter:
     # reasoning + querying functions
     #g.serve("localhost:8080")
     # now visit in http://localhost:8080
-
-
-if __name__ == "__main__":
-    greeter = HelloWorldExample("neo4j://localhost:7687", "neo4j", "admin1234")
-    greeter.print_greeting("hello, world")
-    greeter.close()
+'''

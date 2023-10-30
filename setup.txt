@@ -1,4 +1,15 @@
-Neo4J Desktop Setup
-    Plugins: https://github.com/neo4j-labs/rdflib-neo4j
+Neo4J Desktop Setup https://neo4j.com/download/
+    Account needed for that
+    Its free
+    On Linux distributions FUSE is needed (For Ubuntu >=22.04 'sudo apt install libfuse2')
+    Create Database via desktop app (Credentials for testing: Name: 'Metadata Tool'; Password: 'adminadmin')
+    Install addon Neosemantics (n10s) for RDF use
+        Windows: Plugins --> Install
+        Linux: 
+            Download JAR: https://github.com/neo4j-labs/neosemantics/releases
+            Neo4J Desktop: Open --> Open Folder --> Plugins
+            Put JAR there
+
+Plugins: https://github.com/neo4j-labs/rdflib-neo4j
 virtual environment
 pip requiremetns
