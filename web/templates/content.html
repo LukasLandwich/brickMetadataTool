@@ -254,6 +254,17 @@
         </div>
     </div>
 
+<div class="container">
+    <h2>Button Pressed: {{ButtonPressed}}</h2>
+    <form method="POST"action="/get_handle_post">
+        <input type="text"
+                   name="username"
+                   placeholder="Username">
+        <input type="submit" value="Click Me" >
+    </form>
+ </div>
+
+
 </div>
 <!-- /.container-fluid -->
 {% endblock %}
