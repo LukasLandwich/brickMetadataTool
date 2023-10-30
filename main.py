@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request
 from datetime import datetime
 from neo4jConnector import Neo4JConnector
+from services import exampleService
 
 # Flask constructor takes the name of
 # current module (__name__) as argument.
