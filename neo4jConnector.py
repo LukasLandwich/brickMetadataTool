@@ -1,5 +1,9 @@
 from neo4j import GraphDatabase
-import brickschema
+
+brickSchemaDB = "brickSchema"
+metadataDB = "metadata"
+brickSchemaDownloadPath = "'https://brickschema.org/schema/1.3.0/Brick.ttl'"
+brickSchemaDownloadFileType = "'Turtle'"
 
 class Neo4JConnector:
 
@@ -13,51 +17,49 @@ class Neo4JConnector:
         with self.driver.session() as session:
             greeting = session.execute_write(self._create_and_return_greeting, message)
             print(greeting)
+            
+    def create_entity(self, label:str):
+        self.driver.execute_query()
+            
+    def hasBrickInitialized(self) -> bool:
+        #Get count of database entities
+        result, summary, keys = self.driver.execute_query(
+        "MATCH (n) RETURN count(n) as count",
+        database_= brickSchemaDB)
 
+        #Check if there are any database entities.
+        if result[0]["count"] > 0:
+            #Get GraphConfig Entities
+            result, summary, keys = self.driver.execute_query(
+            "MATCH (n:_GraphConfig) RETURN count(n) as config",
+            database_= brickSchemaDB)
+            #Check if there are any GraphConfig entities. If not, GraphConfig needs to be initialized.
+            if result[0]["config"] > 0:
+                return True
+        return False
+    
+    def loadBrickOntology(self) -> bool:
+        
+        #Init GraphConfig. This is needed for the onto import.
+        self.driver.execute_query(
+            "CALL n10s.graphconfig.init()",
+            database_= brickSchemaDB)
+        
+        #Import ontology from brick schem repo.
+        print("Loadging brick ontology from: " + brickSchemaDownloadPath)
+        self.driver.execute_query(
+            "CALL n10s.onto.import.fetch(" + brickSchemaDownloadPath + "," + brickSchemaDownloadFileType + ")",
+            database_= brickSchemaDB)
+        
+    def updateBrickOnotlogy(self) -> bool:
+        #TODO Discuss if ueful
+        pass
+    
+    def dropBrickOntology(self) -> bool:
+        pass
     @staticmethod
     def _create_and_return_greeting(tx, message):
         result = tx.run("CREATE (a:Greeting) "
                         "SET a.message = $message "
                         "RETURN a.message + ', from node ' + id(a)", message=message)
         return result.single()[0]
-'''
-class BrickAdapter:
-    # creates a new rdflib.Graph with a recent version of the Brick ontology
-    # preloaded.
-    g = brickschema.Graph(load_brick=True, store='neo4j-n10s')
-    # OR use the absolute latest Brick:
-    # g = brickschema.Graph(load_brick_nightly=True)
-    # OR create from an existing model
-    # g = brickschema.Graph(load_brick=True).from_haystack(...)
-
-    # load in data files from your file system
-    #g.load_file("mbuilding.ttl")
-    # ...or by URL (using rdflib)
-    g.parse("https://brickschema.org/ttl/soda_brick.ttl", format="ttl")
-
-    # perform reasoning on the graph (edits in-place)
-    #g.expand(profile="owlrl")
-    #g.expand(profile="shacl") # infers Brick classes from Brick tags
-
-    # validate your Brick graph against built-in shapes (or add your own)
-    #valid, _, resultsText = g.validate()
-    #if not valid:
-        #print("Graph is not valid!")
-        #print(resultsText)
-
-    # perform SPARQL queries on the graph
-    res = g.query("""SELECT ?afs ?afsp ?vav WHERE  {
-        ?afs    a       brick:Air_Flow_Sensor .
-        ?afsp   a       brick:Air_Flow_Setpoint .
-        ?afs    brick:isPointOf ?vav .
-        ?afsp   brick:isPointOf ?vav .
-        ?vav    a   brick:VAV
-    }""")
-    for row in res:
-        print(row)
-
-    # start a blocking web server with an interface for performing
-    # reasoning + querying functions
-    #g.serve("localhost:8080")
-    # now visit in http://localhost:8080
-'''
