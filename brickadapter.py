@@ -1,41 +1,67 @@
 import brickschema
-
+from brickResource import BrickClass, BrickProperty, BrickRelationship
 class BrickAdapter:
-    # creates a new rdflib.Graph with a recent version of the Brick ontology
-    # preloaded.
-    g = brickschema.Graph(load_brick=True, store='neo4j-n10s')
-    # OR use the absolute latest Brick:
-    # g = brickschema.Graph(load_brick_nightly=True)
-    # OR create from an existing model
-    # g = brickschema.Graph(load_brick=True).from_haystack(...)
+   
+    
+    def __init__(self, db) -> None:
+        self.db = db
+        
+        if not db.hasBrickInitialized():
+            print("Brick Onntology isnt initilaized.")
+            db.loadBrickOntology()
+  
+    def getAllClasses(self) -> [BrickClass]:
+        classes, summary, keys = self.db.driver.execute_query(
+        "MATCH (a:n4sch__Class) RETURN a.n4sch__name as name, a.n4sch__label as label, a.n4sch__defintion as defintion, a.uri as uri",
+        database_="brickSchema",
+        )   
+        classesList = []
+        for resource in classes:
+            classesList.append(BrickClass(resource["name"], resource["label"], resource["defintion"], resource["uri"]))
+            
+        return classesList
+    
+  
+    def getAllRelationships(self) -> [BrickRelationship]:
+       
 
-    # load in data files from your file system
-    #g.load_file("mbuilding.ttl")
-    # ...or by URL (using rdflib)
-    g.parse("https://brickschema.org/ttl/soda_brick.ttl", format="ttl")
-
-    # perform reasoning on the graph (edits in-place)
-    #g.expand(profile="owlrl")
-    #g.expand(profile="shacl") # infers Brick classes from Brick tags
-
-    # validate your Brick graph against built-in shapes (or add your own)
-    #valid, _, resultsText = g.validate()
-    #if not valid:
-        #print("Graph is not valid!")
-        #print(resultsText)
-
-    # perform SPARQL queries on the graph
-    res = g.query("""SELECT ?afs ?afsp ?vav WHERE  {
-        ?afs    a       brick:Air_Flow_Sensor .
-        ?afsp   a       brick:Air_Flow_Setpoint .
-        ?afs    brick:isPointOf ?vav .
-        ?afsp   brick:isPointOf ?vav .
-        ?vav    a   brick:VAV
-    }""")
-    for row in res:
-        print(row)
-
-    # start a blocking web server with an interface for performing
-    # reasoning + querying functions
-    #g.serve("localhost:8080")
-    # now visit in http://localhost:8080
+        relationships, summary, keys = self.db.driver.execute_query(
+        "MATCH (a:n4sch__Relationship) RETURN a.n4sch__name as name, a.n4sch__label as label, a.n4sch__defintion as defintion, a.uri as uri",
+        database_="brickSchema",
+        )   
+        relationshipsList = []
+        for resource in relationships:
+            relationshipsList.append(BrickRelationship(resource["name"], resource["label"], resource["defintion"], resource["uri"]))
+            
+        return relationshipsList
+    
+    def getAllProperties(self) -> [BrickProperty]:
+        properties, summary, keys = self.db.driver.execute_query(
+        "MATCH (a:Resource) WHERE SIZE(LABELS(a)) = 1 RETURN a.n4sch__name as name, a.n4sch__label as label, a.n4sch__defintion as defintion, a.uri as uri",
+        database_="brickSchema",
+        )   
+        propertiesList = []
+        for resource in properties:
+            propertiesList.append(BrickProperty(resource["name"], resource["label"], resource["defintion"], resource["uri"]))
+            
+        return propertiesList
+    
+    def getPropertiesOf(self, _class) -> [BrickProperty]:
+        query =  """MATCH (b)-[:n4sch__SCO*0..5]->(a:n4sch__Class) <-[:n4sch__DOMAIN]-(p) where a.n4sch__name='{className}' OR b.n4sch__name='{className}' RETURN p.n4sch__name as name, p.n4sch__label as label, p.n4sch__defintion as defintion, p.uri as uri""".format(className = _class)
+        print(query)
+        properties, summary, keys = self.db.driver.execute_query(query,
+            database_="brickSchema")
+        propertiesList = []
+        for resource in properties:
+            propertiesList.append(BrickProperty(resource["name"] , resource["label"], resource["defintion"], resource["uri"]))
+        return propertiesList
+        
+        
+    def getRelationshipsOf(self, _class) -> [BrickRelationship]:
+        query = """Match (pcrel:n4sch__Relationship) -[]- (pc:n4sch__Class) <-[:n4sch__SCO*0..4]- (c:n4sch__Class) where c.n4sch__name = "Fluid"  Return pcrel.n4sch__name as name, pcrel.n4sch__label as label, pcrel.n4sch__defintion as defintion, pcrel.uri as uri""".format(className = _class)
+        relationships, summary, keys = self.db.driver.execute_query(query,
+            database_="brickSchema")
+        relationshipList = []
+        for resource in relationships:
+            relationshipList.append(BrickRelationship(resource["name"] , resource["label"], resource["defintion"], resource["uri"]))
+        return relationshipList

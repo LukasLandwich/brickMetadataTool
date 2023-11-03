@@ -41,22 +41,34 @@ class Neo4JConnector:
     def loadBrickOntology(self) -> bool:
         
         #Init GraphConfig. This is needed for the onto import.
-        self.driver.execute_query(
+        result, summary, keys = self.driver.execute_query(
             "CALL n10s.graphconfig.init()",
             database_= brickSchemaDB)
         
+        
+        
         #Import ontology from brick schem repo.
         print("Loadging brick ontology from: " + brickSchemaDownloadPath)
-        self.driver.execute_query(
+        result, summary, keys = self.driver.execute_query(
             "CALL n10s.onto.import.fetch(" + brickSchemaDownloadPath + "," + brickSchemaDownloadFileType + ")",
             database_= brickSchemaDB)
+        
+        print(result)
+        
         
     def updateBrickOnotlogy(self) -> bool:
         #TODO Discuss if ueful
         pass
     
     def dropBrickOntology(self) -> bool:
-        pass
+        result, summary, keys = self.driver.execute_query(
+            "MATCH (n) DETACH DELETE n",
+            database_= brickSchemaDB)
+        return result[0]["terminationStatus"] == "OK"
+    
+    def executeQuery(self, query, database):
+        return self.driver.execute_query(query, database)
+    
     @staticmethod
     def _create_and_return_greeting(tx, message):
         result = tx.run("CREATE (a:Greeting) "

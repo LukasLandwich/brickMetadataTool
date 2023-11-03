@@ -1,8 +1,8 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, jsonify
 from datetime import datetime
 from neo4jConnector import Neo4JConnector
+from brickadapter import BrickAdapter
 from services import exampleService
-from brickResource import BrickResource, BrickClass, BrickProperty, BrickRelationship
 
 # Flask constructor takes the name of
 # current module (__name__) as argument.
@@ -12,9 +12,9 @@ app = Flask(__name__,
             template_folder='web/templates'
             )
 
-_now = datetime.utcnow()
 db = None
-
+brick = None
+_now = datetime.utcnow()
 #The route() function of the Flask class is a decorator,
 # which tells the application which URL should call
 # the associated function.
@@ -28,11 +28,27 @@ classesList = []
 def inject_now():
     return {'now': datetime.utcnow(), 'classes': classesList}
 
-#example GET    
-@app.route('/get_handle', methods=["GET"])
-def button():
-    print("Im here")
-    return ('', 204)
+@app.route('/get_all_classes', methods=["GET"])
+def get_all_classes():
+    classes = brick.getAllClasses()
+    return jsonify([c.serialize() for c in classes])
+
+@app.route('/get_all_properties', methods=["GET"])
+def get_all_properties():
+    properties = brick.getAllProperties()
+    return jsonify([p.serialize() for p in properties])
+
+@app.route('/get_all_relationships', methods=["GET"])
+def get_all_relationships():
+    relationships = brick.getAllRelationships()
+    return jsonify([r.serialize() for r in relationships])
+
+@app.route('/get_properties_of', methods=["POST"])
+def get_properties_of():
+    data = request.get_json()
+    _class= data.get('class')
+    properties = brick.getPropertiesOf(_class)
+    return jsonify([p.serialize() for p in properties])
 
 #exampe POST
 @app.route('/get_handle_post', methods=["POST"])
@@ -40,11 +56,11 @@ def button_post():
     username = request.form['username']
     print(username)
     db.print_greeting("hello, world")
-    return ('', 204)
+    return {'now': datetime.utcnow(), 'classes': classesList}
 
 @app.before_request
 def before():
-    print("This is executed BEFORE each request.")
+    pass
 
 
 
@@ -56,37 +72,8 @@ if __name__ == '__main__':
     # run() method of Flask class runs the application
     # on the local development server.
     
-    print(db.hasBrickInitialized())
-    if not db.hasBrickInitialized():
-        print("Brick Onntology isnt initilaized.")
-        
-        db.loadBrickOntology()
-    
-    classes, summary, keys = db.driver.execute_query(
-    "MATCH (a:n4sch__Class) RETURN a.n4sch__name as name, a.n4sch__label as label, a.n4sch__defintion as defintion, a.uri as uri",
-    database_="neo4j",
-    )   
-    classesList = []
-    for resource in classes:
-        classesList.append(BrickClass(resource["name"], resource["label"], resource["defintion"], resource["uri"]))
-    
-    properties, summary, keys = db.driver.execute_query(
-    "MATCH (a:n4sch__Property) RETURN a.n4sch__name as name, a.n4sch__label as label, a.n4sch__defintion as defintion, a.uri as uri",
-    database_="neo4j",
-    )   
-    propertiesList = []
-    for resource in properties:
-        propertiesList.append(BrickProperty(resource["name"], resource["label"], resource["defintion"], resource["uri"]))
-
-    relationships, summary, keys = db.driver.execute_query(
-    "MATCH (a:n4sch__Relationship) RETURN a.n4sch__name as name, a.n4sch__label as label, a.n4sch__defintion as defintion, a.uri as uri",
-    database_="neo4j",
-    )   
-    relationshipsList = []
-    for resource in relationships:
-        relationshipsList.append(BrickRelationship(resource["name"], resource["label"], resource["defintion"], resource["uri"]))
-    
-        
+    brick = BrickAdapter(db)
+    classesList = brick.getAllClasses()
     app.run(debug=True)
     
     db.driver.close()

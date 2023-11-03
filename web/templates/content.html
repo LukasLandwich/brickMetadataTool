@@ -191,7 +191,7 @@
                     <form>
                         <div class="form-group">
                             <label for="exampleFormControlSelect1">Entity Type</label>
-                            <select class="form-control" id="exampleFormControlSelect1" list="values" name="values">
+                            <select class="form-control" id="entityTypeSelect" list="values" name="values">
                                 <option value="{{classes[0]}}" selected>{{classes[0]}}</option>
                                 {% for colour in classes[1:] %}
                                   <option value="{{colour}}">{{colour}}</option>
@@ -244,7 +244,9 @@
                         </div>
                         <button type="submit" class="btn btn-secondary">Cancel</button>
                         <button type="submit" class="btn btn-primary">Submit</button>
+                        
                     </form>
+                    <button id="target">Hello</button>
                 </div>
             </div>
 
@@ -252,17 +254,6 @@
 
         </div>
     </div>
-
-<div class="container">
-    <h2>Button Pressed: {{ButtonPressed}}</h2>
-    <form method="POST"action="/get_handle_post">
-        <input type="text"
-                   name="username"
-                   placeholder="Username">
-        <input type="submit" value="Click Me" >
-    </form>
- </div>
-
 
 
 
