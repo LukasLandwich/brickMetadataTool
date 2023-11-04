@@ -2,6 +2,7 @@ from flask import Flask, render_template, request, jsonify
 from datetime import datetime
 from neo4jConnector import Neo4JConnector
 from brickadapter import BrickAdapter
+from brickResource import BrickClassInstance, BrickPropertyInstance, BrickProperty
 from services import exampleService
 
 # Flask constructor takes the name of
@@ -43,6 +44,10 @@ def get_all_relationships():
     relationships = brick.getAllRelationships()
     return jsonify([r.serialize() for r in relationships])
 
+@app.route('/get_metadata_statistics', methods=["GET"])
+def get_metadata_statistics():
+    pass
+
 @app.route('/get_properties_of', methods=["POST"])
 def get_properties_of():
     data = request.get_json()
@@ -50,17 +55,22 @@ def get_properties_of():
     properties = brick.getPropertiesOf(_class)
     return jsonify([p.serialize() for p in properties])
 
-#exampe POST
-@app.route('/get_handle_post', methods=["POST"])
-def button_post():
-    username = request.form['username']
-    print(username)
-    db.print_greeting("hello, world")
-    return {'now': datetime.utcnow(), 'classes': classesList}
+@app.route('/createEntity', methods=["POST"])
+def createEntity():
+    data = request.get_json()
+    label= data.get('label')
+    name = data.get('name')
+    properties = data.get('properties')
+    
+    response = brick.createNode(name, label, properties)
+    print(response)
+    return "Success", 200, {"Access-Control-Allow-Origin": "*"}
+    
 
 @app.before_request
 def before():
     pass
+
 
 
 
@@ -74,6 +84,11 @@ if __name__ == '__main__':
     
     brick = BrickAdapter(db)
     classesList = brick.getAllClasses()
+    
+    #brickClass = brick.getClassResource("Building")
+    #brickClassInstance = BrickClassInstance(brickClass, name="BuildingTest", properties=[BrickPropertyInstance(BrickProperty(name="yearBuilt", label="yearBuilt", definition="Test", uri=""), 1996)])
+    #brick.createNode(brickClassInstance)
+    
     app.run(debug=True)
     
     db.driver.close()

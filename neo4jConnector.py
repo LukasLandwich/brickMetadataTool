@@ -45,8 +45,6 @@ class Neo4JConnector:
             "CALL n10s.graphconfig.init()",
             database_= brickSchemaDB)
         
-        
-        
         #Import ontology from brick schem repo.
         print("Loadging brick ontology from: " + brickSchemaDownloadPath)
         result, summary, keys = self.driver.execute_query(
@@ -68,10 +66,3 @@ class Neo4JConnector:
     
     def executeQuery(self, query, database):
         return self.driver.execute_query(query, database)
-    
-    @staticmethod
-    def _create_and_return_greeting(tx, message):
-        result = tx.run("CREATE (a:Greeting) "
-                        "SET a.message = $message "
-                        "RETURN a.message + ', from node ' + id(a)", message=message)
-        return result.single()[0]

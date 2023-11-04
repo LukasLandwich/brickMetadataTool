@@ -1,12 +1,19 @@
 $.ajaxSetup({
-  contentType: "application/json; charset=utf-8"
+  contentType: "application/json; charset=utf-8",
+  async: false
 });
 
 
-function get_properties_of(className) {
-    $.post( "/get_properties_of", JSON.stringify({ class: className }), function( data ) {
-        console.log(data);
-      });
+function get_properties_of(className, callback) {
+    $.post( "/get_properties_of", JSON.stringify({ class: className }), callback);
+}
+
+function createEntity(label, name, properties, callback) {
+  $.post( "/createEntity", JSON.stringify({
+      label: label,
+      name: name,
+      properties: properties
+     }), callback);
 }
 
 function getAllClasses() {
