@@ -8,6 +8,10 @@ function get_properties_of(className, callback) {
     $.post( "/get_properties_of", JSON.stringify({ class: className }), callback);
 }
 
+function get_description_of(className, callback) {
+  $.post( "/get_description_of", JSON.stringify({ class: className }), callback);
+}
+
 function createEntity(label, name, properties, callback) {
   $.post( "/createEntity", JSON.stringify({
       label: label,
@@ -32,4 +36,8 @@ function getAllRelationships() {
     $.get( "/get_all_relationships", function( data ) {
         console.log(data);
       });
+}
+
+function getMetadataStatistics(callback) {
+  $.get( "/get_metadata_statistics", callback);
 }

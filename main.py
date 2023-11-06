@@ -46,7 +46,13 @@ def get_all_relationships():
 
 @app.route('/get_metadata_statistics', methods=["GET"])
 def get_metadata_statistics():
-    pass
+    topNClasses = brick.getTopNClasses(3)
+    numberOfEntitites = brick.getNumberOfEntities()
+    numberOfRelationships = brick.getNumberOfRelationships()
+    
+    response = jsonify({"topNClasses": topNClasses, "numberOfEntities": numberOfEntitites, "numberOfRelationships": numberOfRelationships})
+    print(response)
+    return response
 
 @app.route('/get_properties_of', methods=["POST"])
 def get_properties_of():
@@ -54,6 +60,13 @@ def get_properties_of():
     _class= data.get('class')
     properties = brick.getPropertiesOf(_class)
     return jsonify([p.serialize() for p in properties])
+
+@app.route('/get_description_of', methods=["POST"])
+def get_description_of():
+    data = request.get_json()
+    _class= data.get('class')
+    description = brick.getDescriptionOf(_class)
+    return jsonify({"description": description})
 
 @app.route('/createEntity', methods=["POST"])
 def createEntity():

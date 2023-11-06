@@ -1,5 +1,7 @@
 $('#entityTypeSelect').on("change", function() {
-    data = get_properties_of($(this).val(), updatePropertieForm)
+    className = $(this).val()
+    data = get_properties_of(className, updatePropertieForm)
+    get_description_of(className, updateEntityDescription)
     
 });
 
@@ -27,7 +29,7 @@ function updatePropertieForm(data) {
         $('#propertyForm').removeClass("d-none");
 
         $.each(data, function(key,value) {
-            buildPropertyInput(value['name'], el)
+            buildPropertyInput(value['name'], value['definition'], el)
         });
     }
     else {
@@ -36,7 +38,7 @@ function updatePropertieForm(data) {
 }
 
 
-function buildPropertyInput(propertyName, el) {
+function buildPropertyInput(propertyName, definition, el) {
 
     var lable = $('<lable>', {
         for: 'propertyInput_' + propertyName,
@@ -47,7 +49,10 @@ function buildPropertyInput(propertyName, el) {
         class: 'form-control',
         id: 'propertyInput_' + propertyName,
         propertyName: propertyName,
-        placeholder: 'Insert Property Value'
+        placeholder: 'Insert Property Value',
+        "data-toggle":"tooltip",
+        "data-placement":"top",
+        title: definition,
     })
     
     var div = $('<div>', {
@@ -58,4 +63,29 @@ function buildPropertyInput(propertyName, el) {
     div.append(input)
     div.appendTo(el)
 }
+
+function updateStatistics() {
+    getMetadataStatistics(updateStatisticsCallback)
+}
+
+function updateStatisticsCallback(data) {
+    $("#numberOfEntities").text((data["numberOfEntities"]))
+    $("#numberOfRelationships").text(data["numberOfRelationships"])
+    var topN = ""
+    for (key in data["topNClasses"]){
+        console.log(key)
+        console.log(data["topNClasses"][key])
+        topN += key + data["topNClasses"][key]    
+    }
+    $("#topEntities").text(topN)
+
+}
+
+function updateEntityDescription(data) {
+    $("#entityDescription").attr("title", data["description"])
+}
+
+$("#test").on("click", function() {
+    updateStatistics()
+})
 
