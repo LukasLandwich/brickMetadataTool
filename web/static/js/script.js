@@ -1,3 +1,13 @@
+var propertySave_dontAskAgain = false
+
+jQuery(updateStatistics)
+
+$('#propertySaveButton').on("click", togglePropertySaveModal)
+$('#propertySave_cancelButton').on("click", cancelPropertySaveModal)
+$('#propertySave_saveButton').on("click", savePropertySaveModal)
+$('#propertySettignsDropdownButton').on("click", function() {$('#propertySettignsDropdown').toggle()})
+
+
 $('#entityTypeSelect').on("change", function() {
     className = $(this).val()
     data = get_properties_of(className, updatePropertieForm)
@@ -7,19 +17,57 @@ $('#entityTypeSelect').on("change", function() {
 
 $('#addEntitySubmit').on("click", function() {
     
+    togglePropertySaveModal()
+
     label = $('#entityTypeSelect').val()
     _name = $('#entityName').val()
     properties = []
     $.each($('input[id^="propertyInput_"]'), function(index, element) {
         properties.push({label: $(element).attr('propertyName'), value: $(element).val()})
     })
-    createEntity(label, _name, properties, function(){})
+    
+    createEntity(label, _name, properties,  updateStatistics)
+    
 });
 
-$('#addEntityCancle').on("click", function() {
-    
+$('#addEntityCancle').on("click", function() {   
     console.log("Cancle")   
 });
+
+function togglePropertySaveModal() {
+    if (!propertySave_dontAskAgain) {
+        $('#propertySaveModal').modal('show'); 
+    }
+    else {
+        clearEntityAndPropertyInputs()
+    }
+}
+
+function cancelPropertySaveModal(){
+    if($('#propertieSave_dontAskAgain').is(':checked')) {
+        propertySave_dontAskAgain = true
+    }
+    $('#propertySaveModal').modal('hide');
+}
+
+function savePropertySaveModal() {
+    label = $('#entityTypeSelect').val()
+    _name = $('#propertyBlueprintName').val()
+    properties = []
+    $.each($('input[id^="propertyInput_"]'), function(index, element) {
+        properties.push({label: $(element).attr('propertyName'), value: $(element).val()})
+    })
+    createPropertyBlueprint(label, _name, properties, function(){})
+    $('#propertySaveModal').modal('hide');
+    clearEntityAndPropertyInputs()
+}
+
+function clearEntityAndPropertyInputs() {
+    $('#entityName').val("")
+    $.each($('input[id^="propertyInput_"]'), function(index, element) {
+        $(element).val("")
+    })
+}
 
 function updatePropertieForm(data) {
     length = Object.keys(data).length;
@@ -44,6 +92,7 @@ function buildPropertyInput(propertyName, definition, el) {
         for: 'propertyInput_' + propertyName,
         text: propertyName
     })
+    
     var input = $('<input>', {
         type:'text',
         class: 'form-control',

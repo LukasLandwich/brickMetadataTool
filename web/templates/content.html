@@ -13,7 +13,7 @@
 
     <div id="metadataStatistics" class="row">
 
-        <!-- Earnings (Monthly) Card Example -->
+         <!--Statistics Card - Number of Entities-->
         <div class="col-xl-3 col-md-6 mb-4">
             <div class="card border-left-primary shadow h-100 py-2">
                 <div class="card-body">
@@ -31,7 +31,7 @@
             </div>
         </div>
 
-        <!-- Earnings (Monthly) Card Example -->
+         <!--Statistics Card - Number of Relationships-->
         <div class="col-xl-3 col-md-6 mb-4">
             <div class="card border-left-success shadow h-100 py-2">
                 <div class="card-body">
@@ -49,7 +49,7 @@
             </div>
         </div>
 
-        <!-- Earnings (Monthly) Card Example -->
+        <!--Statistics Card - Top Entities-->
         <div class="col-xl-3 col-md-6 mb-4">
             <div class="card border-left-info shadow h-100 py-2">
                 <div class="card-body">
@@ -87,9 +87,9 @@
                         <div class="row">
                             <div class="col-lg-11">
                                 <select class="form-control" id="entityTypeSelect" list="values" name="values">
-                                    <option value="{{classes[0]}}" selected>{{classes[0]}}</option>
+                                    <option value="{{classes[0].name}}"  selected>{{classes[0].label}}</option>
                                     {% for class in classes[1:] %}
-                                        <option value="{{class}}">{{class}}</option>
+                                        <option value="{{class.name}}">{{class.label}}</option>
                                     {% endfor %}
                                 </select>
                             </div>
@@ -101,7 +101,7 @@
                     <div class="form-row align-items-center">
                         <div class="col-auto">
                             <label for="entityName">Entity Name</label>
-                            <input type="email" class="form-control" id="entityName" placeholder="new_entity_name">        
+                            <input type="text" class="form-control" id="entityName" placeholder="new_entity_name">        
                         </div>
                         <div class="col-auto">
                             <div class="form-check mb-2">
@@ -130,7 +130,19 @@
             <!-- Project Card Example -->
             <div id="propertyForm" class="card shadow mb-4 d-none">
                 <div class="card-header py-3">
-                    <h6 class="m-0 font-weight-bold text-primary">Add Properties</h6>
+                    <div class="row">
+                        <div class="col-11">
+                            <h6 class="m-0 font-weight-bold text-primary">Add Properties</h6>
+                        </div>
+                        <div class="col-1 text-right">
+                            <button id="propertySettignsDropdownButton" class="btn btn-sm dropdown-toggle dropleft" type="button" data-bs-toggle="dropdown" aria-expanded="false"></button>
+                            <ul id="propertySettignsDropdown" class="dropdown-menu" >
+                                <li><a class="dropdown-item" href="#">Action</a></li>
+                                <li><a class="dropdown-item" href="#">Another action</a></li>
+                                <li><a class="dropdown-item" href="#">Something else here</a></li>
+                            </ul>
+                        </div>
+                    </div>
                 </div>
                 <div class="card-body">
                     <form>
@@ -162,7 +174,30 @@
     </div>
     <button id="test" class="btn btn-primary">Test Button</button>
 
-
+    <!-- Property Save Blueprint Modal -->
+    <div class="modal fade" id="propertySaveModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Do you wanna save the properties as blueprint?</h5>
+                </div>
+                <div class="modal-body">
+                    <label for="propertyBlueprintName">Property Blueprint Name</label>
+                    <input type="text" class="form-control" id="propertyBlueprintName" placeholder="new_blueprint_name">
+                </div>
+                <div class="modal-footer">
+                    <div class="form-check mb-2">
+                        <input class="form-check-input" type="checkbox" value="" id="propertieSave_dontAskAgain">
+                        <label class="form-check-label" for="propertieSave_dontAskAgain">
+                        Don't ask again
+                        </label>
+                    </div>
+                    <button id="propertySave_cancelButton" type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                    <button id="propertySave_saveButton" type="button" class="btn btn-primary">Save Properties</button>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 <!-- /.container-fluid -->
 {% endblock %}

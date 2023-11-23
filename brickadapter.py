@@ -1,11 +1,13 @@
 import brickschema
 from brickResource import BrickClass, BrickProperty, BrickRelationship, BrickClassInstance
+from neo4jConnector import Neo4JConnector
 class BrickAdapter:
    
-    brickDatabasePath="brickSchema"
-    metadataDatabasePath ="metadata"
+    brickDatabasePath = "brickSchema"
+    metadataDatabasePath = "metadata"
+    propertyStoreDatabasePath = "propertystore"
     
-    def __init__(self, db) -> None:
+    def __init__(self, db:Neo4JConnector) -> None:
         self.db = db
         
         if not db.hasBrickInitialized():
@@ -13,9 +15,9 @@ class BrickAdapter:
             db.loadBrickOntology()
   
     def getAllClasses(self) -> [BrickClass]:
-        classes, summary, keys = self.db.driver.execute_query(
+        classes = self.db.executeQuery(
         "MATCH (a:n4sch__Class) RETURN a.n4sch__name as name, a.n4sch__label as label, a.n4sch__definition as definition, a.uri as uri",
-        database_= self.brickDatabasePath,
+        self.brickDatabasePath,
         )   
         classesList = []
         for resource in classes:
@@ -27,9 +29,9 @@ class BrickAdapter:
     def getAllRelationships(self) -> [BrickRelationship]:
        
 
-        relationships, summary, keys = self.db.driver.execute_query(
+        relationships = self.db.executeQuery(
         "MATCH (a:n4sch__Relationship) RETURN a.n4sch__name as name, a.n4sch__label as label, a.n4sch__definition as definition, a.uri as uri",
-        database_=self.brickDatabasePath,
+        self.brickDatabasePath,
         )   
         relationshipsList = []
         for resource in relationships:
@@ -38,9 +40,9 @@ class BrickAdapter:
         return relationshipsList
     
     def getAllProperties(self) -> [BrickProperty]:
-        properties, summary, keys = self.db.driver.execute_query(
+        properties = self.db.executeQuery(
         "MATCH (a:Resource) WHERE SIZE(LABELS(a)) = 1 RETURN a.n4sch__name as name, a.n4sch__label as label, a.n4sch__definition as definition, a.uri as uri",
-        database_= self.brickDatabasePath,
+        self.brickDatabasePath,
         )   
         propertiesList = []
         for resource in properties:
@@ -49,10 +51,9 @@ class BrickAdapter:
         return propertiesList
     
     def getPropertiesOf(self, _class) -> [BrickProperty]:  
-        query =  """MATCH (p)- [:n4sch__DOMAIN] ->(b)<-[:n4sch__SCO*0..5]-(a:n4sch__Class) where a.n4sch__name='{className}' RETURN Distinct p.n4sch__name as name, p.n4sch__label as label, p.n4sch__definition as definition, p.uri as uri""".format(className = _class)
+        query =  """MATCH (p)- [:n4sch__DOMAIN] ->(b)<-[:n4sch__SCO*0..5]-(a:n4sch__Class) where not p:n4sch__Relationship and a.n4sch__name='{className}' RETURN Distinct p.n4sch__name as name, p.n4sch__label as label, p.n4sch__definition as definition, p.uri as uri""".format(className = _class)
         print(query)
-        properties, summary, keys = self.db.driver.execute_query(query,
-            database_= self.brickDatabasePath)
+        properties = self.db.executeQuery(query, self.brickDatabasePath)
         propertiesList = []
         for resource in properties:
             propertiesList.append(BrickProperty(resource["name"] , resource["label"], resource["definition"], resource["uri"]))
@@ -60,8 +61,7 @@ class BrickAdapter:
     
     def getDescriptionOf(self, _class) -> [BrickProperty]:  
         query =  """MATCH (a:n4sch__Class) where a.n4sch__name='{className}' RETURN a.n4sch__definition as definition""".format(className = _class)
-        result, summary, keys = self.db.driver.execute_query(query,
-            database_= self.brickDatabasePath)
+        result = self.db.executeQuery(query, self.brickDatabasePath)
         if len(result) == 0:
             description = "No description available."
         else:
@@ -72,8 +72,7 @@ class BrickAdapter:
         
     def getRelationshipsOf(self, _class) -> [BrickRelationship]:
         query = """Match (pcrel:n4sch__Relationship) -[]- (pc:n4sch__Class) <-[:n4sch__SCO*0..4]- (c:n4sch__Class) where c.n4sch__name = '{className}'  Return Distinct pcrel.n4sch__name as name, pcrel.n4sch__label as label, pcrel.n4sch__definition as definition, pcrel.uri as uri""".format(className = _class)
-        relationships, summary, keys = self.db.driver.execute_query(query,
-            database_= self.brickDatabasePath)
+        relationships = self.db.executeQuery(query, self.brickDatabasePath)
         relationshipList = []
         for resource in relationships:
             relationshipList.append(BrickRelationship(resource["name"] , resource["label"], resource["definition"], resource["uri"]))
@@ -81,33 +80,27 @@ class BrickAdapter:
     
     def getClassResource(self, name:str) -> BrickClass:
         query = """match (c:n4sch__Class) where c.n4sch__label = '{className}' Return c.n4sch__name as name, c.n4sch__label as label, c.n4sch__defintion as definition, c.uri as uri""".format(className = name) 
-        brickClass, summary, keys = self.db.driver.execute_query(query,
-            database_= self.brickDatabasePath)
+        brickClass = self.db.executeQuery(query, self.brickDatabasePath)
         resource = brickClass[0]
         return BrickClass(resource["name"] , resource["label"], resource["definition"], resource["uri"])
     
-    def createNode(self, classisntance:BrickClassInstance) -> bool:
-        relationships, summary, keys = self.db.driver.execute_query(classisntance.getCreationQuery(),
-            database_= self.metadataDatabasePath)
+    def createNode(self, classisntance:BrickClassInstance, database) -> bool:
+        query = classisntance.getCreationQuery()
+        relationships = self.db.executeQuery(query,database)
         #TODO handle response and return fitting bool
         return True
         
-    def createNode(self, name:str, label:str, properties:dict) -> bool:
-        relationships, summary, keys = self.db.driver.execute_query(BrickClassInstance.getCreationQuery(name, label, properties),
-            database_= self.metadataDatabasePath)
-        #TODO handle response and return fitting bool
-        return True
-    
-    def savePropertySetting(self, name:str, _class:str, properties:dict):
-        pass
     
     
     #def createRelationship(self, type:str,)
     
+    
+    
+    #------------Analytics Functions----------------
+    
     def getTopNClasses(self, N) -> dict:
         query = """Match (e) with labels(e) as l, count(labels(e)) as cnt return l, cnt order by cnt desc Limit {limit}""".format(limit = N) 
-        result, summary, keys = self.db.driver.execute_query(query,
-            database_= self.metadataDatabasePath)
+        result= self.db.executeQuery(query, self.metadataDatabasePath)
         
         topNClasses = dict(map(lambda n: (n["l"][0], n["cnt"]), result))
         print(topNClasses)
@@ -115,14 +108,12 @@ class BrickAdapter:
     
     def getNumberOfEntities(self) -> int:
         query = "MATCH (n) RETURN count(n) as cnt"
-        result, summary, keys = self.db.driver.execute_query(query,
-            database_= self.metadataDatabasePath)
+        result = self.db.executeQuery(query, self.metadataDatabasePath)
         return result[0]["cnt"]
     
     def getNumberOfRelationships(self) -> int:
         query = "MATCH ()-->() RETURN count(*) as cnt"
-        result, summary, keys = self.db.driver.execute_query(query,
-            database_= self.metadataDatabasePath)
+        result = self.db.executeQuery(query, self.metadataDatabasePath)
         return result[0]["cnt"]
     
     

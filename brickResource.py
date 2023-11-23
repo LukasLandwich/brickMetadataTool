@@ -21,14 +21,18 @@ class BrickResource:
 class BrickProperty(BrickResource):
     def __init__(self, name:str, label:str, definition:str, uri:str) -> None:
         super().__init__(name, label, definition, uri)
+        
 
 class BrickRelationship(BrickResource):
     def __init__(self, name:str, label:str, definition:str, uri:str) -> None:
         super().__init__(name, label, definition, uri)
         
+
+        
 class BrickClass(BrickResource):
     def __init__(self, name:str, label:str, definition:str, uri:str) -> None:
         super().__init__(name, label, definition, uri)
+
         
         
 class BrickRessourceInstance:
@@ -36,16 +40,13 @@ class BrickRessourceInstance:
 
 class BrickPropertyInstance(BrickRessourceInstance):
     def __init__(self, propertyResource:BrickProperty, value) -> None:
-        super().__init__()
         self.propertyResource = propertyResource
         self.value = value
+
         
     def getCreationQuery(self) -> str:
-        return self.getCreationQuery(self.propertyResource.label, self.value)
+        return "{}: '{}'".format(self.propertyResource.name ,str(self.value))
     
-    @staticmethod
-    def getCreationQuery(label, value):
-        return "{}: '{}'".format(label ,str(value))
         
 class BrickClassInstance(BrickRessourceInstance):
     def __init__(self, classResource:BrickClass, name:str, properties:[BrickPropertyInstance]) -> None:
@@ -59,15 +60,8 @@ class BrickClassInstance(BrickRessourceInstance):
             propertyString = "{name: '" + self.name + "'}"
         else:
             propertyString = "{name: '" + self.name +"', " + ', '.join(p.getCreationQuery() for p in self.properties) + "}"
-        return "CREATE (:{} {})".format(self.classResource.label ,propertyString)
-    
-    @staticmethod
-    def getCreationQuery(name, label, properties):
-        if len(properties) == 0:
-            propertyString = "{name: '" + name + "'}"
-        else:
-            propertyString = "{name: '" + name +"', " + ', '.join(BrickPropertyInstance.getCreationQuery(p['label'], p['value']) for p in properties) + "}"
-        return "CREATE (:{} {})".format(label , propertyString)
+        return "CREATE (:{} {})".format(self.classResource.name ,propertyString)
+ 
         
 class BrickRelationshipInstance(BrickRessourceInstance):
     def __init__(self, relationshipResource:BrickRelationship, _from:BrickClassInstance, _to:BrickClassInstance) -> None:

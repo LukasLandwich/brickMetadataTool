@@ -1,6 +1,5 @@
 $.ajaxSetup({
   contentType: "application/json; charset=utf-8",
-  async: false
 });
 
 
@@ -19,6 +18,15 @@ function createEntity(label, name, properties, callback) {
       properties: properties
      }), callback);
 }
+
+function createPropertyBlueprint(label, name, properties, callback) {
+  $.post( "/createPropertyBlueprint", JSON.stringify({
+      label: label,
+      name: name,
+      properties: properties
+     }), callback);
+}
+
 
 function getAllClasses() {
     $.get( "/get_all_classes", function( data ) {

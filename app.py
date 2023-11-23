@@ -2,8 +2,8 @@ from flask import Flask, render_template, request, jsonify
 from datetime import datetime
 from neo4jConnector import Neo4JConnector
 from brickadapter import BrickAdapter
-from brickResource import BrickClassInstance, BrickPropertyInstance, BrickProperty
-from services import exampleService
+from brickResourceDictionary import BrickResourceDictionaty
+from brickResource import *
 
 # Flask constructor takes the name of
 # current module (__name__) as argument.
@@ -15,6 +15,7 @@ app = Flask(__name__,
 
 db = None
 brick = None
+brickDict = None
 _now = datetime.utcnow()
 #The route() function of the Flask class is a decorator,
 # which tells the application which URL should call
@@ -71,21 +72,35 @@ def get_description_of():
 @app.route('/createEntity', methods=["POST"])
 def createEntity():
     data = request.get_json()
+    
+    label= data.get('label')
+    name = data.get('name')
+    properties = data.get('properties')
+
+    classInstance = BrickClassInstance(brickDict.getClass(label), name, [BrickPropertyInstance(brickDict.getProperty(p['label']), p['value']) for p in properties])
+    
+    
+    response = brick.createNode(classInstance, BrickAdapter.metadataDatabasePath)
+    if response: 
+        return "Success", 200, {"Access-Control-Allow-Origin": "*"}
+    else:
+        return "Internal Server Error", 500
+
+@app.route('/createPropertyBlueprint', methods=["POST"])
+def createPropertyBlueprint():
+    data = request.get_json()
     label= data.get('label')
     name = data.get('name')
     properties = data.get('properties')
     
-    response = brick.createNode(name, label, properties)
-    print(response)
-    return "Success", 200, {"Access-Control-Allow-Origin": "*"}
+    classInstance = BrickClassInstance(brickDict.getClass(label), name, [BrickPropertyInstance(brickDict.getProperty(p['label']), p['value']) for p in properties])
     
-
-@app.before_request
-def before():
-    pass
-
-
-
+    response = brick.createNode(classInstance, BrickAdapter.propertyStoreDatabasePath)
+    if response: 
+        return "Success", 200, {"Access-Control-Allow-Origin": "*"}
+    else:
+        return "Internal Server Error", 500
+    
 
 # main driver function
 if __name__ == '__main__':
@@ -96,15 +111,9 @@ if __name__ == '__main__':
     # on the local development server.
     
     brick = BrickAdapter(db)
-    classesList = brick.getAllClasses()
-    
-    #brickClass = brick.getClassResource("Building")
-    #brickClassInstance = BrickClassInstance(brickClass, name="BuildingTest", properties=[BrickPropertyInstance(BrickProperty(name="yearBuilt", label="yearBuilt", definition="Test", uri=""), 1996)])
-    #brick.createNode(brickClassInstance)
-    
+    brickDict = BrickResourceDictionaty(brick)
+    classesList = [x for x in brickDict.classes.values()]
+
     app.run(debug=True)
     
-    db.driver.close()
-    
-    
-    
+    db.driver.close()   

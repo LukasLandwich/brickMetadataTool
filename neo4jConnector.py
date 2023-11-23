@@ -1,4 +1,5 @@
-from neo4j import GraphDatabase
+from neo4j import GraphDatabase, Result,NotificationSeverity
+import logging
 
 brickSchemaDB = "brickSchema"
 metadataDB = "metadata"
@@ -7,6 +8,8 @@ brickSchemaDownloadFileType = "'Turtle'"
 
 class Neo4JConnector:
 
+    log = logging.getLogger(__name__)
+    
     def __init__(self, uri, user, password):
         self.driver = GraphDatabase.driver(uri, auth=(user, password))
 
@@ -64,5 +67,33 @@ class Neo4JConnector:
             database_= brickSchemaDB)
         return result[0]["terminationStatus"] == "OK"
     
+    def resultTransformer(result: Result):
+        return result.values
+    
     def executeQuery(self, query, database):
-        return self.driver.execute_query(query, database)
+         result, summary, key = self.driver.execute_query(query, database_=database)
+         self.handleSummary(summary)
+         return result
+    
+    def handleSummary(self, summary):
+        for notification in summary.summary_notifications:
+            severity = notification.severity_level
+            if severity == NotificationSeverity.WARNING:
+                # or severity_level == "WARNING"
+                self.log.warning("%r", notification)
+            elif severity == NotificationSeverity.INFORMATION:
+                # or severity_level == "INFORMATION"
+                self.log.info("%r", notification)
+            else:
+                # assert severity == NotificationSeverity.UNKNOWN
+                # or severity_level == "UNKNOWN"
+                self.log.debug("%r", notification)
+     
+
+
+
+
+
+
+
+
