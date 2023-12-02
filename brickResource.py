@@ -1,6 +1,7 @@
 import json
+from ontologyResource import OntologyResource, OntologyResourceInstance
 
-class BrickResource:
+class BrickResource(OntologyResource):
     def __init__(self, name:str, label:str, definition:str, uri:str) -> None:
         self.name = name
         self.label = label
@@ -35,8 +36,9 @@ class BrickClass(BrickResource):
 
         
         
-class BrickRessourceInstance:
-    pass
+class BrickRessourceInstance(OntologyResourceInstance):
+    def getCreationQuery(self) -> str:
+        pass
 
 class BrickPropertyInstance(BrickRessourceInstance):
     def __init__(self, propertyResource:BrickProperty, value) -> None:

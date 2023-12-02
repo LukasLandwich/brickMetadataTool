@@ -10,8 +10,8 @@ $('#propertySettignsDropdownButton').on("click", function() {$('#propertySettign
 
 $('#entityTypeSelect').on("change", function() {
     className = $(this).val()
-    data = get_properties_of(className, updatePropertieForm)
-    get_description_of(className, updateEntityDescription)
+    data = get_possible_properties_of(className, updatePropertieForm)
+    get_definition_of(className, updateEntityDescription)
     
 });
 

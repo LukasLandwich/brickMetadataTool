@@ -2,7 +2,7 @@ from flask import Flask, render_template, request, jsonify
 from datetime import datetime
 from neo4jConnector import Neo4JConnector
 from brickadapter import BrickAdapter
-from brickResourceDictionary import BrickResourceDictionaty
+from resourceDictionary import ResourceDictionaty
 from brickResource import *
 
 # Flask constructor takes the name of
@@ -55,19 +55,20 @@ def get_metadata_statistics():
     print(response)
     return response
 
-@app.route('/get_properties_of', methods=["POST"])
-def get_properties_of():
+@app.route('/get_possible_properties_of', methods=["POST"])
+def get_possible_properties_of():
     data = request.get_json()
     _class= data.get('class')
-    properties = brick.getPropertiesOf(_class)
+    properties = brick.getPossiblePropertiesOf(_class)
     return jsonify([p.serialize() for p in properties])
 
-@app.route('/get_description_of', methods=["POST"])
-def get_description_of():
+@app.route('/get_definition_of', methods=["POST"])
+def get_definition_of():
     data = request.get_json()
     _class= data.get('class')
-    description = brick.getDescriptionOf(_class)
-    return jsonify({"description": description})
+    
+    definition = brickDict.getClass(_class).definition
+    return jsonify({"definition": definition})
 
 @app.route('/createEntity', methods=["POST"])
 def createEntity():
@@ -111,7 +112,7 @@ if __name__ == '__main__':
     # on the local development server.
     
     brick = BrickAdapter(db)
-    brickDict = BrickResourceDictionaty(brick)
+    brickDict = ResourceDictionaty(brick)
     classesList = [x for x in brickDict.classes.values()]
 
     app.run(debug=True)

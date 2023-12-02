@@ -3,12 +3,12 @@ $.ajaxSetup({
 });
 
 
-function get_properties_of(className, callback) {
-    $.post( "/get_properties_of", JSON.stringify({ class: className }), callback);
+function get_possible_properties_of(className, callback) {
+    $.post( "/get_possible_properties_of", JSON.stringify({ class: className }), callback);
 }
 
-function get_description_of(className, callback) {
-  $.post( "/get_description_of", JSON.stringify({ class: className }), callback);
+function get_definition_of(className, callback) {
+  $.post( "/get_definition_of", JSON.stringify({ class: className }), callback);
 }
 
 function createEntity(label, name, properties, callback) {
