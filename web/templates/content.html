@@ -87,9 +87,19 @@
                         <div class="row">
                             <div class="col-lg-11">
                                 <select class="form-control" id="entityTypeSelect" list="values" name="values">
-                                    <option value="{{classes[0].name}}"  selected>{{classes[0].label}}</option>
+                                    <option value="{{classes[0].name}}"  selected>
+                                        {% if classes[0].label != None %}
+                                            {{classes[0].label}}
+                                        {% else %}
+                                            {{classes[0].name}}
+                                        {% endif %}</option>
                                     {% for class in classes[1:] %}
-                                        <option value="{{class.name}}">{{class.label}}</option>
+                                        <option value="{{class.name}}">
+                                            {% if class.label != None %}
+                                                {{class.label}}
+                                            {% else %}
+                                                {{class.name}}
+                                            {% endif %}</option>
                                     {% endfor %}
                                 </select>
                             </div>

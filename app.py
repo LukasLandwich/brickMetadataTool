@@ -1,28 +1,30 @@
 from flask import Flask, render_template, request, jsonify
+from apiflask import APIFlask
 from datetime import datetime
 from neo4jConnector import Neo4JConnector
-from brickadapter import BrickAdapter
+from brickAdapter import BrickAdapter
+from metadataAdapter import MetadataAdapter
 from resourceDictionary import ResourceDictionaty
 from brickResource import *
 
 # Flask constructor takes the name of
 # current module (__name__) as argument.
-app = Flask(__name__,
+app = APIFlask(__name__,
             static_url_path='', 
             static_folder='web/static',
-            template_folder='web/templates'
+            template_folder='web/templates',
+            spec_path='/spec'
             )
 
-db = None
 brick = None
 brickDict = None
-_now = datetime.utcnow()
+
 #The route() function of the Flask class is a decorator,
 # which tells the application which URL should call
 # the associated function.
 @app.route('/')
 def main_page():
-    return render_template('content.html', now = _now)
+    return render_template('content.html')
 
 classesList = []
 #example context infusion   
@@ -47,9 +49,9 @@ def get_all_relationships():
 
 @app.route('/get_metadata_statistics', methods=["GET"])
 def get_metadata_statistics():
-    topNClasses = brick.getTopNClasses(3)
-    numberOfEntitites = brick.getNumberOfEntities()
-    numberOfRelationships = brick.getNumberOfRelationships()
+    topNClasses = metadata.getTopNClasses(3)
+    numberOfEntitites = metadata.getNumberOfEntities()
+    numberOfRelationships = metadata.getNumberOfRelationships()
     
     response = jsonify({"topNClasses": topNClasses, "numberOfEntities": numberOfEntitites, "numberOfRelationships": numberOfRelationships})
     print(response)
@@ -112,9 +114,10 @@ if __name__ == '__main__':
     # on the local development server.
     
     brick = BrickAdapter(db)
+    metadata = MetadataAdapter(db)
     brickDict = ResourceDictionaty(brick)
     classesList = [x for x in brickDict.classes.values()]
 
     app.run(debug=True)
     
-    db.driver.close()   
+    brick.db.driver.close()   
