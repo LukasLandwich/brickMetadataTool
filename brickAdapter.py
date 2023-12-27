@@ -1,4 +1,4 @@
-from brickResource import BrickResource, BrickClassInstance
+from brickResource import BrickResource, BrickResourceInstance, BrickClassInstance
 from neo4jConnector import Neo4JConnector
 from brickResourceType import BrickResourceType
 from ontologyAdapter import OntologyAdapter
@@ -144,16 +144,16 @@ class BrickAdapter(OntologyAdapter):
     
     
     #---------------------Query Creators----------------------
-    def getCreationQuery(self, res: BrickResource) -> str:
-        if res.type == BrickResourceType.CLASS:
-            return "{}: '{}'".format(res.propertyResource.name ,str(res.value))
-        elif res.type == BrickResourceType.PROPERTY:
-            if len(res.properties) == 0:
-                propertyString = "{name: '" + res.name + "'}"
+    def getCreationQuery(self, instance: BrickResourceInstance) -> str:
+        if instance.resource.type == BrickResourceType.PROPERTY:
+            return "{}: '{}'".format(instance.resource.name ,str(instance.value))
+        elif instance.resource.type == BrickResourceType.CLASS:
+            if len(instance.properties) == 0:
+                propertyString = "{name: '" + instance.name + "'}"
             else:
-                propertyString = "{name: '" + res.name +"', " + ', '.join(self.getCreationQuery(p) for p in res.properties) + "}"
-            return "CREATE (:{} {})".format(res.classResource.name ,propertyString)
-        elif res.type == BrickResourceType.RELATIONSHIP:
+                propertyString = "{name: '" + instance.name +"', " + ', '.join(self.getCreationQuery(p) for p in instance.properties) + "}"
+            return "CREATE (:{} {})".format(instance.resource.name ,propertyString)
+        elif instance.resource.type == BrickResourceType.RELATIONSHIP:
             pass
         else:
             print("Unknow Brick Resoruce Type. Please check and/or change implementaiton.")

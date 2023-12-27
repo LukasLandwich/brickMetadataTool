@@ -83,7 +83,7 @@ def createEntity():
     classInstance = BrickClassInstance(brickDict.getClass(label), name, [BrickPropertyInstance(brickDict.getProperty(p['label']), p['value']) for p in properties])
     
     
-    response = brick.createNode(classInstance, BrickAdapter.metadataDatabasePath)
+    response = brick.createNode(classInstance, Neo4JConnector.metadataDatabasePath)
     if response: 
         return "Success", 200, {"Access-Control-Allow-Origin": "*"}
     else:

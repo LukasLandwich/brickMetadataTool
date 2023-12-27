@@ -28,7 +28,7 @@ class MetadataAdapter():
         return result[0]["cnt"]
     
     def getAllClassesOf(self, resource:OntologyResource):
-        query = """Match (c:{lable}) return c""".format(resource.)
+        query = """Match (c:{lable}) return c""".format(resource.lable)
     
     def getMetadataStatistics(self):
         pass

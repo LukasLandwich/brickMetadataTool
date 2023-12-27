@@ -15,7 +15,4 @@ class OntologyResource(ABC):
         pass
     
 class OntologyResourceInstance(ABC):
-    
-    @abstractmethod
-    def getCreationQuery(self) -> str:
-        pass
+    pass
