@@ -15,7 +15,7 @@ app = APIFlask(__name__,
             template_folder='web/templates',
             spec_path='/spec'
             )
-
+app.json.sort_keys = False
 brick = None
 brickDict = None
 
@@ -24,13 +24,21 @@ brickDict = None
 # the associated function.
 @app.route('/')
 def main_page():
-    return render_template('content.html')
+    return render_template('entityMaintainance.html')
+
+@app.route('/relationship')
+def relationship():
+    return render_template('relationshipMaintainance.html')
+
+@app.route('/dataStatistics')
+def view_data():
+    return render_template('dataStatistics.html')
 
 classesList = []
 #example context infusion   
 @app.context_processor
 def inject_now():
-    return {'now': datetime.utcnow(), 'classes': classesList}
+    return {'classes': classesList}
 
 @app.route('/get_all_classes', methods=["GET"])
 def get_all_classes():
@@ -47,14 +55,18 @@ def get_all_relationships():
     relationships = brick.getAllRelationships()
     return jsonify([r.serialize() for r in relationships])
 
+@app.route('/get_all_existing_entities', methods=["GET"])
+def get_all_existing_entities():
+    entities = metadata.getAllExistingEntities()
+    return jsonify([e.serialize() for e in entities])
+
 @app.route('/get_metadata_statistics', methods=["GET"])
 def get_metadata_statistics():
-    topNClasses = metadata.getTopNClasses(3)
+    topNClasses = metadata.getTopNClasses(10)
     numberOfEntitites = metadata.getNumberOfEntities()
     numberOfRelationships = metadata.getNumberOfRelationships()
     
     response = jsonify({"topNClasses": topNClasses, "numberOfEntities": numberOfEntitites, "numberOfRelationships": numberOfRelationships})
-    print(response)
     return response
 
 @app.route('/get_possible_properties_of', methods=["POST"])
@@ -64,12 +76,31 @@ def get_possible_properties_of():
     properties = brick.getPossiblePropertiesOf(_class)
     return jsonify([p.serialize() for p in properties])
 
+@app.route('/get_possible_relationships_of', methods=["POST"])
+def get_possible_relationships_of():
+    
+    data = request.get_json()
+    byId = data.get('byId')
+    
+    if byId:
+        id= data.get('id')
+        _class = metadata.getClassOf(id).name
+    else:
+        _class= data.get('class')
+        
+    relationships = brick.getPossibleRelationshipsOf(_class)
+    return jsonify([r.serialize() for r in relationships])
+
+
+    
+
 @app.route('/get_definition_of', methods=["POST"])
 def get_definition_of():
     data = request.get_json()
     _class= data.get('class')
     
-    definition = brickDict.getClass(_class).definition
+    resource = brickDict.getClass(_class)
+    definition = resource.definition
     return jsonify({"definition": definition})
 
 @app.route('/createEntity', methods=["POST"])
@@ -82,12 +113,28 @@ def createEntity():
 
     classInstance = BrickClassInstance(brickDict.getClass(label), name, [BrickPropertyInstance(brickDict.getProperty(p['label']), p['value']) for p in properties])
     
-    
-    response = brick.createNode(classInstance, Neo4JConnector.metadataDatabasePath)
+    response = metadata.createNode(classInstance)
     if response: 
         return "Success", 200, {"Access-Control-Allow-Origin": "*"}
     else:
         return "Internal Server Error", 500
+
+@app.route('/createRelationship', methods=["POST"])
+def createRelationship():
+    data = request.get_json()
+    fromId = data.get('fromId')
+    toId = data.get('toId')
+    relType = data.get('relType')
+    fromInstance = metadata.getEntityById(fromId)
+    toInstance = metadata.getEntityById(toId)
+    relationship = BrickRelationshipInstance(brickDict.getReslationship(relType),fromInstance, toInstance)
+    response = metadata.createRelationshipOnExisingNodes(relationship, fromInstance, toInstance)
+    
+    if response: 
+        return "Success", 200, {"Access-Control-Allow-Origin": "*"}
+    else:
+        return "Internal Server Error", 500
+
 
 @app.route('/createPropertyBlueprint', methods=["POST"])
 def createPropertyBlueprint():
@@ -95,16 +142,30 @@ def createPropertyBlueprint():
     label= data.get('label')
     name = data.get('name')
     properties = data.get('properties')
-    
     classInstance = BrickClassInstance(brickDict.getClass(label), name, [BrickPropertyInstance(brickDict.getProperty(p['label']), p['value']) for p in properties])
     
-    response = brick.createNode(classInstance, BrickAdapter.propertyStoreDatabasePath)
+    response = metadata.createNode(classInstance, True)
     if response: 
         return "Success", 200, {"Access-Control-Allow-Origin": "*"}
     else:
         return "Internal Server Error", 500
-    
 
+
+@app.route('/get_possible_Blueprints', methods=["POST"])
+def get_possible_Blueprints():
+    data = request.get_json()
+    className = data.get('class')
+   
+    blueprints = metadata.getBlueprintsOf(className)
+    return jsonify([r.serialize() for r in blueprints])
+
+@app.route('/get_blueprint_by_id', methods=["POST"])
+def get_blueprint_by_id():
+    data = request.get_json()
+    _id = data.get('id')
+   
+    blueprint = metadata.getBlueprintById(_id)
+    return jsonify(blueprint.serialize())
 # main driver function
 if __name__ == '__main__':
     #Open Neo4J DB connection.
@@ -114,9 +175,11 @@ if __name__ == '__main__':
     # on the local development server.
     
     brick = BrickAdapter(db)
-    metadata = MetadataAdapter(db)
     brickDict = ResourceDictionaty(brick)
+    metadata = MetadataAdapter(db, brickDict)
     classesList = [x for x in brickDict.classes.values()]
+
+    metadata.getAllExistingEntities()
 
     app.run(debug=True)
     

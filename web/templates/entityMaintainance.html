@@ -1,0 +1,134 @@
+{%extends "index.html" %} 
+{%block content%} 
+
+<!-- Begin Page Content -->                
+<div class="container-fluid">
+
+    <!-- Page Heading -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Maintain Data - Entities</h1>
+    </div>
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item active" aria-current="page"><a href="#">Entities</a></li>
+          <li class="breadcrumb-item"><a href="/relationship">Relationships</a></li>
+        </ol>
+    </nav>
+    <div class="alert alert-warning alert-dismissible fade show" role="alert" id="entityAlert">
+        <strong>Warning: </strong> <span id="entityAlertText">You should check in on some of those fields below.</span>
+        <button type="button" class="close" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+
+    <div class="alert alert-info alert-dismissible fade show" role="alert" id="entitySuccess">
+        <span id="entitySuccessText">You should check in on some of those fields below.</span>
+        <button type="button" class="close" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+    <!-- Content Row -->
+    <div class="row">
+
+        <!-- Content Column -->
+        <div class="col-lg-4 mb-4 align-items-stretch">
+            <!-- Project Card Example -->
+            <div class="card shadow mb-4 h-100">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Add New Entity</h6>
+                </div>
+                <div class="card-body">
+                    <label>Entity Type</label>
+                    <div class="row">
+                        <div class="col-lg-11">
+                            <select class="form-control" id="entityTypeSelect" list="values" name="values">
+                                <option value="{{classes[0].name}}"  selected>Select entity class</option>
+                                {% for class in classes %}
+                                    <option value="{{class.name}}">
+                                        {% if class.label != None %}
+                                            {{class.label}}
+                                        {% else %}
+                                            {{class.name}}
+                                        {% endif %}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div id="entityDescription" style="text-align: center" class="col-lg-1" data-toggle="tooltip" data-placement="top" title="Tooltip on top">
+                            <i class="fas fa-question-circle text-gray-700"></i>
+                        </div>
+                    </div>
+                   
+                    <div class="form-group">
+                        <div class="form-check mb-2">
+                            <input class="form-check-input" type="checkbox" value="" id="addAnotherEntityCheck">
+                            <label class="form-check-label" for="addAnotherEntityCheck">Add another Entity</label>
+                        </div>
+                    </div>
+                    
+                    <button id="addEntityBlueprint" class="btn btn-primary">Save As Blueprint</button>
+                    <button id="addEntitySubmit" class="btn btn-primary">Submit</button>  
+                    <button id="addEntityClear" class="btn btn-secondary mt-2">Clear Input</button>
+                </div>
+            </div>
+        </div>
+        <!-- Content Column -->
+        <div class="col-lg-8 mb-4 align-items-stretch">
+            <!-- Project Card Example -->
+            <div id="propertyForm" class="card shadow mb-4 h-100">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Add Properties</h6>
+                </div>
+                <div class="card-body">
+                        <div class="form-row align-items-center">
+                            <div class="col-auto">
+                                <label for="entityName">Entity Name</label>
+                                <input type="text" class="form-control" id="entityName" placeholder="new_entity_name">        
+                            </div>
+                            <div class="col-auto">
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="checkbox" value="" id="flexCheckDefault">
+                                    <label class="form-check-label" for="flexCheckDefault">Auto Naming</label>
+                                </div>
+                            </div>
+                        </div>
+                        <hr>
+                        <div id="propertyForm_textInputs" class="form-row align-items-center mt-2">
+                            <!--Textboxes for properties will be injected here-->
+                            <!--Update happens on class/entity selection-->
+                        </div> 
+                        <hr>
+                        <div id="propertyForm_availableBlueprints" class="form-row align-items-center mt-2 d-none">
+                            <label class="form-check-label" for="propertyForm_availableBlueprintsSelect">Load Blueprint</label>
+                            <select class="form-control" id="propertyForm_availableBlueprintsSelect" list="values" name="values">
+                                <!-- Possible Blueprints will be injected here -->
+                            </select>
+                        </div>                        
+                </div>
+            </div>
+        </div>
+    </div>
+
+    
+    <button id="test" class="btn btn-primary">Test Button</button>
+
+    <!-- Property Save Blueprint Modal -->
+    <div class="modal fade" id="propertySaveModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Do you wanna save the properties as blueprint?</h5>
+                </div>
+                <div class="modal-body">
+                    <label for="propertyBlueprintName">Property Blueprint Name</label>
+                    <input type="text" class="form-control" id="propertyBlueprintName" placeholder="new_blueprint_name">
+                </div>
+                <div class="modal-footer">
+                    <button id="propertySave_cancelButton" type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                    <button id="propertySave_saveButton" type="button" class="btn btn-primary">Save Properties</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- /.container-fluid -->
+{% endblock %}

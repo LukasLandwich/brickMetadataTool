@@ -1,0 +1,81 @@
+{%extends "index.html" %} 
+{%block content%} 
+
+<!-- Begin Page Content -->                
+<div class="container-fluid">
+
+    <!-- Page Heading -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Dashboard</h1>
+        <a href="#" id="downloadDataButton"class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm"><i
+                class="fas fa-download fa-sm text-white-50"></i> Download Data</a>
+    </div>
+
+   
+    <div id="metadataStatistics" class="row">
+
+        <!--Statistics Card - Number of Entities-->
+       <div class="col-xl-3 col-md-6 mb-4">
+           <div class="card border-left-primary shadow h-100 py-2">
+               <div class="card-body">
+                   <div class="row no-gutters align-items-center">
+                       <div class="col mr-2">
+                           <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                               Number of Entities</div>
+                           <div id="numberOfEntities" class="h5 mb-0 font-weight-bold text-gray-800"></div>
+                       </div>
+                       <div class="col-auto">
+                           <i class="fas fa-database fa-2x text-gray-300"></i>
+                       </div>
+                   </div>
+               </div>
+           </div>
+       </div>
+
+        <!--Statistics Card - Number of Relationships-->
+       <div class="col-xl-3 col-md-6 mb-4">
+           <div class="card border-left-success shadow h-100 py-2">
+               <div class="card-body">
+                   <div class="row no-gutters align-items-center">
+                       <div class="col mr-2">
+                           <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                               Number of Relationships</div>
+                           <div id="numberOfRelationships" class="h5 mb-0 font-weight-bold text-gray-800"></div>
+                       </div>
+                       <div class="col-auto">
+                           <i class="fas fa-exchange-alt fa-2x text-gray-300"></i>
+                       </div>
+                   </div>
+               </div>
+           </div>
+       </div>
+   </div>
+   
+   <div class="card shadow mb-4">
+       <div class="card-header py-3">
+           <h6 class="m-0 font-weight-bold text-primary">Top 10 Entity Types</h6>
+       </div>
+       <div class="card-body">
+           <div class="table-responsive">
+               <table class="table table-bordered" id="topEntitiesTable" width="100%" cellspacing="0">
+                   <thead>
+                       <tr>
+                           <th>Class Name</th>
+                           <th>Description</th>
+                           <th>Number of Entities</th>
+                       </tr>
+                   </thead>
+                   <tbody id="topEntitiesTableBody">
+                        <!-- Entries are loaded here on page load-->
+                       
+                   </tbody>
+               </table>
+           </div>
+       </div>
+   </div>
+
+
+
+</div>
+<!-- /.container-fluid -->
+{% endblock %}

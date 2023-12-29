@@ -1,4 +1,5 @@
-from brickResource import BrickResource, BrickResourceInstance, BrickClassInstance
+from brickResource import BrickResource, BrickClassInstance
+from ontologyResource import OntologyResourceInstance
 from neo4jConnector import Neo4JConnector
 from brickResourceType import BrickResourceType
 from ontologyAdapter import OntologyAdapter
@@ -56,7 +57,6 @@ class BrickAdapter(OntologyAdapter):
     
     def getPossiblePropertiesOf(self, _class:str) -> [BrickResource]:  
         query =  """MATCH (p)- [:n4sch__DOMAIN] ->(b)<-[:n4sch__SCO*0..5]-(a:n4sch__Class) where SIZE(LABELS(p)) = 1 and a.n4sch__name='{className}' RETURN Distinct p.n4sch__name as name, p.n4sch__label as label, p.n4sch__definition as definition, p.uri as uri""".format(className = _class)
-        print(query)
         properties = self.db.executeQuery(query, Neo4JConnector.ontologyDatabasePath)
         propertiesList = []
         for resource in properties:
@@ -77,21 +77,10 @@ class BrickAdapter(OntologyAdapter):
         resource = brickClass[0]
         return BrickResource(resource["name"] , resource["label"], resource["definition"], resource["uri"], BrickResourceType.CLASS)
     
-    def createNode(self, classisntance:BrickClassInstance, database) -> bool:
-        query = self.getCreationQuery(classisntance)
-        relationships = self.db.executeQuery(query,database)
-        #TODO handle response and return fitting bool
-        return True
-        
-    
-    
-    def createRelationship(self, type:str, _from:str):
+
+    def createNode(self, classInstance: OntologyResourceInstance) -> bool:
         pass
-    
-    
-    
-    
-    
+        #TODO Think of deleting method out of interface
     
     
     #--------------------Ontology Management-----------------
@@ -143,17 +132,4 @@ class BrickAdapter(OntologyAdapter):
         return result[0]["terminationStatus"] == "OK"
     
     
-    #---------------------Query Creators----------------------
-    def getCreationQuery(self, instance: BrickResourceInstance) -> str:
-        if instance.resource.type == BrickResourceType.PROPERTY:
-            return "{}: '{}'".format(instance.resource.name ,str(instance.value))
-        elif instance.resource.type == BrickResourceType.CLASS:
-            if len(instance.properties) == 0:
-                propertyString = "{name: '" + instance.name + "'}"
-            else:
-                propertyString = "{name: '" + instance.name +"', " + ', '.join(self.getCreationQuery(p) for p in instance.properties) + "}"
-            return "CREATE (:{} {})".format(instance.resource.name ,propertyString)
-        elif instance.resource.type == BrickResourceType.RELATIONSHIP:
-            pass
-        else:
-            print("Unknow Brick Resoruce Type. Please check and/or change implementaiton.")
+   

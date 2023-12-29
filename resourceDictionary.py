@@ -1,5 +1,6 @@
 from ontologyAdapter import OntologyAdapter
 from ontologyResource import OntologyResource
+from brickResource import BrickResource
 
 class ResourceDictionaty:
     
@@ -8,7 +9,7 @@ class ResourceDictionaty:
         self.properties = dict(sorted({x.name : x for x in db.getAllProperties()}.items()))
         self.relationships = dict(sorted({x.name : x for x in db.getAllRelationships()}.items()))
         
-    def getClass(self, label:str) -> OntologyResource:
+    def getClass(self, label:str) -> BrickResource:
         return self.classes.get(label)
     
     
