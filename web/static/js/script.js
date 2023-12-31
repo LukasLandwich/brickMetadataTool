@@ -135,13 +135,13 @@ function updateRelationshipTypeSelect(data) {
     var el = $("#relationshipTypeSelect");
     el.empty(); 
     if (length > 0) {
-        $('#relationshipForm_type').removeClass("d-none");
+        buildSelectOption("Select Relationship Type", "", el)
         $.each(data, function(key,value) {
             buildSelectOption(value['label'], value['name'], el)
         });
     }
     else {
-        $('#relationshipForm_type').addClass("d-none");
+        buildSelectOption("There are no Possible Relationship Types", "", el)
     }
 }
 
@@ -152,13 +152,16 @@ function updateRelationshipEntitySelect(data) {
     var el2 = $("#relationshipEntityToSelect");
     el2.empty(); 
     if (length > 0) {
+        buildSelectOption("Select Entity", "", el1)
+        buildSelectOption("Select Entity", "", el2)
         $.each(data, function(key,value) {
             buildSelectOption(value['name'], value['id'], el1)
             buildSelectOption(value['name'], value['id'], el2)
         });
     }
     else {
-        $('#relationshipForm_type').addClass("d-none");
+        buildSelectOption("There are no Existing Entities", "", el1)
+        buildSelectOption("There are no Existing Entities", "", el2)
     }
 }
 
@@ -250,16 +253,6 @@ function createEntityTableEntry(className, description, count) {
 function updateEntityDescription(data) {
     $("#entityDescription").attr('title', data["definition"])
 }
-
-
-function downloadData() {
-    //TODO Implement
-    console.log("Download Data")
-}
-
-$("#test").on("click", function() {
-    showAlertMessage("Test", "entity")
-})
 
 function showAlertMessage(message, type) {
     if (type == "entityAlert") {

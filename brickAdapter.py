@@ -18,7 +18,7 @@ class BrickAdapter(OntologyAdapter):
   
     def getAllClasses(self) -> [BrickResource]:
         classes = self.db.executeQuery(
-        "MATCH (a:n4sch__Class) RETURN a.n4sch__name as name, a.n4sch__label as label, a.n4sch__definition as definition, a.uri as uri",
+        "MATCH (a:n4sch__Class) where not a.n4sch__name =~'.*Shape.*' RETURN a.n4sch__name as name, a.n4sch__label as label, a.n4sch__definition as definition, a.uri as uri",
         Neo4JConnector.ontologyDatabasePath,
         )   
         classesList = []
@@ -27,6 +27,16 @@ class BrickAdapter(OntologyAdapter):
             
         return classesList
     
+    def getAllShapes(self) -> [BrickResource]:
+        shapes = classes = self.db.executeQuery(
+        "MATCH (a:n4sch__Class) where a.n4sch__name =~'.*Shape.*' RETURN a.n4sch__name as name, a.n4sch__label as label, a.n4sch__definition as definition, a.uri as uri",
+        Neo4JConnector.ontologyDatabasePath,
+        ) 
+        shapesList = []
+        for shape in shapes:
+            shapesList.append(BrickResource(shape["name"], shape["label"], shape["definition"], shape["uri"], BrickResourceType.SHAPE))
+            
+        return shapesList
   
     def getAllRelationships(self) -> [BrickResource]:
         relationships = self.db.executeQuery(

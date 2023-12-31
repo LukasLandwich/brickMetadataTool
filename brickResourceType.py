@@ -4,3 +4,4 @@ class BrickResourceType(Enum):
     CLASS = "Class"
     PROPERTY = "Property"
     RELATIONSHIP = "Relationship"
+    SHAPE = "Shape"

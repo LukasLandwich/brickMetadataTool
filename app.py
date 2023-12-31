@@ -45,6 +45,11 @@ def get_all_classes():
     classes = brick.getAllClasses()
     return jsonify([c.serialize() for c in classes])
 
+@app.route('/get_all_shapes', methods=["GET"])
+def get_all_shapes():
+    shapes = brick.getAllShapes()
+    return jsonify([c.serialize() for c in shapes])
+
 @app.route('/get_all_properties', methods=["GET"])
 def get_all_properties():
     properties = brick.getAllProperties()

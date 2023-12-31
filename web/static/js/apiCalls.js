@@ -23,6 +23,10 @@ function get_all_existing_entities(callback) {
   $.get( "/get_all_existing_entities", callback);
 }
 
+function get_all_shapes(callback) {
+  $.get( "/get_all_shapes", callback);
+}
+
 function createEntity(entityValues, callback) {
   $.post( "/createEntity", JSON.stringify(entityValues), callback);
 }
