@@ -11,9 +11,17 @@ function savePropertySaveModal() {
 function entitySumbmitClick() {
     
     entityValues = collectEntityValues()
-    createEntity(entityValues, updateStatistics)
-    clearEntityAndPropertyInputs()
-    showAlertMessage("Entity sucessfully created: " + entityValues["name"], "entitySuccess")
+    if (entityValues["label"] == "") {
+        showAlertMessage("No entity type selected!", "entityAlert")
+    }
+    else if (entityValues["name"] == "") {
+        showAlertMessage("No entity name spefified!", "entityAlert")
+    }
+    else {
+        createEntity(entityValues, updateStatistics)
+        clearEntityAndPropertyInputs()
+        showAlertMessage("Entity sucessfully created: " + entityValues["name"], "entitySuccess")
+    }
 }
 
 function clearEntityAndPropertyInputs() {
@@ -24,6 +32,16 @@ function clearEntityAndPropertyInputs() {
             $(element).val("")
         })
     }
+}
+
+function clearRelationshipForm() {
+    selectFrom = $('#relationshipEntityFromSelect')
+    selectType = $('#relationshipTypeSelect')
+    selectTo = $('#relationshipEntityToSelect')
+    $(selectFrom).val("")
+    $(selectTo).val("")
+    $(selectType).empty()
+    buildSelectOption("Select Entity","", selectType)
 }
 
 function collectEntityValues(blueprint = false ) {
@@ -51,6 +69,7 @@ function addAnotherEntityCheckChange() {
 
 
 function updatePropertieForm(data) {
+    console.log(data)
     length = Object.keys(data).length;
     var el = $("#propertyForm_textInputs");
     el.empty(); 
@@ -58,7 +77,7 @@ function updatePropertieForm(data) {
         $('#propertyForm_textInputs').removeClass("d-none");
 
         $.each(data, function(key,value) {
-            buildPropertyInput(value['name'], value['definition'], el)
+            buildPropertyInput(value[0]['name'], value[0]['definition'], el)
         });
     }
     else {
@@ -208,8 +227,20 @@ function submitRelationshipOnExisiting() {
     fromId = $('#relationshipEntityFromSelect').val()
     toId = $('#relationshipEntityToSelect').val()
     relType = $('#relationshipTypeSelect').val()
-
-    createRelationship(fromId, toId, relType)
+    if (fromId == "") {
+        showAlertMessage("No entity selected.", "relationshipAlert")
+    }
+    else if (relType == "") {
+        showAlertMessage("No relationship type selected.", "relationshipAlert")
+    }
+    else if (toId == "") {
+        showAlertMessage("Second entity not selected.", "relationshipAlert")
+    }
+    else {
+        createRelationship(fromId, toId, relType)
+        clearRelationshipForm()
+        showAlertMessage(relType + " relationship from " + fromId + " to " + toId + " created.", "relationshipSuccess")
+    }
 }
 
 function updateStatistics() {
@@ -271,11 +302,15 @@ function showAlertMessage(message, type) {
         altertbox = $('#relationshipAlert')
         alterText = $('#relationshipAlertText')
     }
-    $(altertbox).show()
     $(alterText).empty()
     $(alterText).text(message)
+    $(altertbox).removeClass("d-none")
 }
 
 $('.alert .close').on('click', function(e) {
-    $(this).parent().hide();
+    $(this).parent().addClass("d-none");
 });
+
+function downloadData() {
+    //TODO implement
+}

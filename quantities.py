@@ -284,18 +284,16 @@ quantity_definitions = {
 
 
 
-def get_units(quantityName:str) -> [str]:
+def getUnitFor(quantityName:str) -> [str]:
     if quantity_definitions.keys().__contains__(quantityName):
         return quantity_definitions[quantityName]["applicableUnit"]
     else:
         return []
 
-def all_units():
+def allAllUnits() -> [str]:
     units = []
     for key in quantity_definitions.keys():
         for x in quantity_definitions.get(key)["applicableUnit"]:
             units.append(x)
         
     return set(units)
-       
-get_units("Volume")

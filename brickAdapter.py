@@ -3,6 +3,7 @@ from ontologyResource import OntologyResourceInstance
 from neo4jConnector import Neo4JConnector
 from brickResourceType import BrickResourceType
 from ontologyAdapter import OntologyAdapter
+from quantities import getUnitFor
 
 class BrickAdapter(OntologyAdapter):
        
@@ -56,30 +57,10 @@ class BrickAdapter(OntologyAdapter):
         )   
         propertiesList = []
         for resource in properties:
-            propertiesList.append(BrickResource(resource["name"], resource["label"], resource["definition"], resource["uri"], BrickResourceType.PROPERTY))
+            prop = BrickResource(resource["name"], resource["label"], resource["definition"], resource["uri"], BrickResourceType.PROPERTY)
+            propertiesList.append(prop)
             
         return propertiesList
-    
-    def getAllShpaes(self) -> [BrickResource]:
-        #TODO Implement if needed
-        #match (a) -[:n4sch__DOMAIN]- (b) - [:n4sch__RANGE] - (c)-[]-(d) where a.n4sch__label= "Building" return a,b,c,d
-        pass
-    
-    def getPossiblePropertiesOf(self, _class:str) -> [BrickResource]:  
-        query =  """MATCH (p)- [:n4sch__DOMAIN] ->(b)<-[:n4sch__SCO*0..5]-(a:n4sch__Class) where SIZE(LABELS(p)) = 1 and a.n4sch__name='{className}' RETURN Distinct p.n4sch__name as name, p.n4sch__label as label, p.n4sch__definition as definition, p.uri as uri""".format(className = _class)
-        properties = self.db.executeQuery(query, Neo4JConnector.ontologyDatabasePath)
-        propertiesList = []
-        for resource in properties:
-            propertiesList.append(BrickResource(resource["name"] , resource["label"], resource["definition"], resource["uri"], BrickResourceType.PROPERTY))
-        return propertiesList      
-        
-    def getPossibleRelationshipsOf(self, _class:str) -> [BrickResource]:
-        query = """Match (pcrel:n4sch__Relationship) -[]- (pc:n4sch__Class) <-[:n4sch__SCO*0..4]- (c:n4sch__Class) where c.n4sch__name = '{className}'  Return Distinct pcrel.n4sch__name as name, pcrel.n4sch__label as label, pcrel.n4sch__definition as definition, pcrel.uri as uri""".format(className = _class)
-        relationships = self.db.executeQuery(query, Neo4JConnector.ontologyDatabasePath)
-        relationshipList = []
-        for resource in relationships:
-            relationshipList.append(BrickResource(resource["name"] , resource["label"], resource["definition"], resource["uri"], BrickResourceType.RELATIONSHIP))
-        return relationshipList
     
     def getClass(self, name:str) -> BrickResource:
         query = """match (c:n4sch__Class) where c.n4sch__label = '{className}' Return c.n4sch__name as name, c.n4sch__label as label, c.n4sch__defintion as definition, c.uri as uri""".format(className = name) 
@@ -87,10 +68,38 @@ class BrickAdapter(OntologyAdapter):
         resource = brickClass[0]
         return BrickResource(resource["name"] , resource["label"], resource["definition"], resource["uri"], BrickResourceType.CLASS)
     
+    def getPossiblePropertiesOf(self, _class:str) -> [(BrickResource, BrickResource)]:  
+        query =  """MATCH (p)- [:n4sch__DOMAIN] ->(b)<-[:n4sch__SCO*0..5]-(a:n4sch__Class) where SIZE(LABELS(p)) = 1 and a.n4sch__name='{className}' RETURN Distinct p.n4sch__name as name, p.n4sch__label as label, p.n4sch__definition as definition, p.uri as uri""".format(className = _class)
+        properties = self.db.executeQuery(query, Neo4JConnector.ontologyDatabasePath)
+        propertiesList = []
+        for resource in properties:
+            prop = BrickResource(resource["name"] , resource["label"], resource["definition"], resource["uri"], BrickResourceType.PROPERTY)
+            shape = self.getShapeOfProperty(prop)
+            if shape != None:
+                quantityName = shape.name.replace("Shape", "")
+                print(quantityName)
+                unit = getUnitFor(quantityName)
+                print(unit)
+            propertiesList.append((prop,shape))
 
-    def createNode(self, classInstance: OntologyResourceInstance) -> bool:
-        pass
-        #TODO Think of deleting method out of interface
+        return propertiesList  
+    
+    def getShapeOfProperty(self, property:BrickResource) -> BrickResource:
+        query = """MATCH (vs)<-[:n4sch__SCO*0..5]-(s)<-[:n4sch__RANGE]-(p) where p.n4sch__name ='{propertyName}' and vs.n4sch__name = "ValueShape" return s.n4sch__name as name, s.n4sch__label as label, s.n4sch__definition as definition, s.uri as uri""".format(propertyName = property.name)
+        property = self.db.executeQuery(query, Neo4JConnector.ontologyDatabasePath)
+        if len(property) > 0:
+            resource = BrickResource(property[0]["name"] , property[0]["label"], property[0]["definition"], property[0]["uri"], BrickResourceType.SHAPE)
+            return resource
+        else:
+            return None
+      
+    def getPossibleRelationshipsOf(self, _class:str) -> [BrickResource]:
+        query = """Match (pcrel:n4sch__Relationship) -[]- (pc:n4sch__Class) <-[:n4sch__SCO*0..4]- (c:n4sch__Class) where c.n4sch__name = '{className}'  Return Distinct pcrel.n4sch__name as name, pcrel.n4sch__label as label, pcrel.n4sch__definition as definition, pcrel.uri as uri""".format(className = _class)
+        relationships = self.db.executeQuery(query, Neo4JConnector.ontologyDatabasePath)
+        relationshipList = []
+        for resource in relationships:
+            relationshipList.append(BrickResource(resource["name"] , resource["label"], resource["definition"], resource["uri"], BrickResourceType.RELATIONSHIP))
+        return relationshipList
     
     
     #--------------------Ontology Management-----------------

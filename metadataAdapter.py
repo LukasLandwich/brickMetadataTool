@@ -52,7 +52,6 @@ class MetadataAdapter():
     def getAllExistingEntities(self) -> [BrickClassInstance]:
         query = "Match (e) return e"
         result= self.db.executeQuery(query, Neo4JConnector.metadataDatabasePath)
-        
         return [self.convertResultIntoClassInstance(r, "e") for r in result]   
     
     def getAllEntityClasses(self) -> [str]:
@@ -66,7 +65,10 @@ class MetadataAdapter():
         keys = node.keys()
         id = node.id
         name = node['name']
-        _classType, = node.labels
+        if len(node.labels) > 0:
+            _classType, = node.labels
+        else:
+            return None
         properties = []
         for key in keys:
             if key == 'name':
@@ -85,8 +87,12 @@ class MetadataAdapter():
     def getTopNClasses(self, N) -> dict:
         query = """Match (e) with labels(e) as l, count(labels(e)) as cnt return l, cnt order by cnt desc Limit {limit}""".format(limit = N) 
         result= self.db.executeQuery(query, Neo4JConnector.metadataDatabasePath)
-        topNClasses = {r["l"][0]: {"count": r["cnt"], "description": self.dict.getClass(r["l"][0]).definition} for r in result} 
-        return topNClasses
+        if len(result) > 0:
+            topNClasses = {r["l"][0]: {"count": r["cnt"], "description": self.dict.getClass(r["l"][0]).definition} for r in result} 
+            return topNClasses
+        else:
+            return None
+
     
     def getNumberOfEntities(self) -> int:
         query = "MATCH (n) RETURN count(n) as cnt"

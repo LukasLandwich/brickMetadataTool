@@ -8,7 +8,7 @@ class OntologyAdapter(ABC):
         pass
     
     @abstractmethod
-    def getClass(self, name:str) -> OntologyResource:
+    def getAllShapes(self) ->[OntologyResource]:
         pass
     
     @abstractmethod
@@ -20,15 +20,19 @@ class OntologyAdapter(ABC):
         pass
     
     @abstractmethod
+    def getClass(self, name:str) -> OntologyResource:
+        pass
+    
+    @abstractmethod
     def getPossiblePropertiesOf(self, _class:str) -> [OntologyResource]:
         pass
     
     @abstractmethod
-    def getPossibleRelationshipsOf(self, _class:str) -> [OntologyResource]:
+    def getShapeOfProperty(self, property:OntologyResource) -> OntologyResource:
         pass
     
     @abstractmethod
-    def createNode(self, classInstance:OntologyResourceInstance) -> bool:
+    def getPossibleRelationshipsOf(self, _class:str) -> [OntologyResource]:
         pass
     
     @abstractmethod

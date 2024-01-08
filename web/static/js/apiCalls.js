@@ -28,11 +28,11 @@ function get_all_shapes(callback) {
 }
 
 function createEntity(entityValues, callback) {
-  $.post( "/createEntity", JSON.stringify(entityValues), callback);
+  $.post( "/create_entity", JSON.stringify(entityValues), callback);
 }
 
 function createRelationship(fromId, toId, relType, callback) {
-  $.post( "/createRelationship", JSON.stringify({
+  $.post( "/create_relationship", JSON.stringify({
     fromId: fromId,
     toId: toId,
     relType: relType
@@ -41,7 +41,7 @@ function createRelationship(fromId, toId, relType, callback) {
 
 
 function createPropertyBlueprint(entityValues, callback) {
-  $.post( "/createPropertyBlueprint", JSON.stringify(entityValues), callback);
+  $.post( "/get_possible_blueprints", JSON.stringify(entityValues), callback);
 }
 
 function getPossibleBlueprints(className, callback) {

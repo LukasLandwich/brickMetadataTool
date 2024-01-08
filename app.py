@@ -24,14 +24,29 @@ brickDict = None
 # the associated function.
 @app.route('/')
 def main_page():
+    """Get mainpage (entity creation) of the web application.
+
+    Returns Jinja Template containing all components of the main page.
+    ---
+    """
     return render_template('entityMaintainance.html')
 
 @app.route('/relationship')
 def relationship():
+    """Get relationship page (relationship creation) of the web application.
+
+    Returns Jinja Template containing all components of the relationship maintenace page.
+    ---
+    """
     return render_template('relationshipMaintainance.html')
 
-@app.route('/dataStatistics')
+@app.route('/data_Statistics')
 def view_data():
+    """Get metadata statistics page of the web application.
+
+    Returns Jinja Template containing all components of the relationship metadata statistics page.
+    ---
+    """
     return render_template('dataStatistics.html')
 
 classesList = []
@@ -42,48 +57,74 @@ def inject_now():
 
 @app.route('/get_all_classes', methods=["GET"])
 def get_all_classes():
+    """Get all classes defined in the ontology.
+    ---
+    """
     classes = brick.getAllClasses()
     return jsonify([c.serialize() for c in classes])
 
 @app.route('/get_all_shapes', methods=["GET"])
 def get_all_shapes():
+    """Get all shapes defined in the ontology.
+    ---
+    """
     shapes = brick.getAllShapes()
     return jsonify([c.serialize() for c in shapes])
 
 @app.route('/get_all_properties', methods=["GET"])
 def get_all_properties():
+    """Get all properties defined in the ontology.
+    ---
+    """
     properties = brick.getAllProperties()
     return jsonify([p.serialize() for p in properties])
 
 @app.route('/get_all_relationships', methods=["GET"])
 def get_all_relationships():
+    """Get all relationships defined in the ontology.
+    ---
+    """
     relationships = brick.getAllRelationships()
     return jsonify([r.serialize() for r in relationships])
 
 @app.route('/get_all_existing_entities', methods=["GET"])
 def get_all_existing_entities():
+    """Get all existing metadata etntites, that were already created by the usner.
+    ---
+    """
     entities = metadata.getAllExistingEntities()
     return jsonify([e.serialize() for e in entities])
 
 @app.route('/get_metadata_statistics', methods=["GET"])
 def get_metadata_statistics():
+    """Get a statistic of metadata etntites, that were already created by the usner.
+    ---
+    """
     topNClasses = metadata.getTopNClasses(10)
-    numberOfEntitites = metadata.getNumberOfEntities()
-    numberOfRelationships = metadata.getNumberOfRelationships()
-    
-    response = jsonify({"topNClasses": topNClasses, "numberOfEntities": numberOfEntitites, "numberOfRelationships": numberOfRelationships})
-    return response
+    if topNClasses != None:
+        numberOfEntitites = metadata.getNumberOfEntities()
+        numberOfRelationships = metadata.getNumberOfRelationships()
+        
+        response = jsonify({"topNClasses": topNClasses, "numberOfEntities": numberOfEntitites, "numberOfRelationships": numberOfRelationships})
+        return response
+    else: 
+        return "Success", 200, {"Access-Control-Allow-Origin": "*"}
 
 @app.route('/get_possible_properties_of', methods=["POST"])
 def get_possible_properties_of():
+    """Get all possible properties of an onotlogy entity defined in the ontology.
+    ---
+    """
     data = request.get_json()
     _class= data.get('class')
     properties = brick.getPossiblePropertiesOf(_class)
-    return jsonify([p.serialize() for p in properties])
+    return jsonify([(p.serialize(),s.serialize() if s != None else None) for (p,s) in properties])
 
 @app.route('/get_possible_relationships_of', methods=["POST"])
 def get_possible_relationships_of():
-    
+    """Get all possible relationships of an onotlogy entity defined in the ontology.
+    ---
+    """
     data = request.get_json()
     byId = data.get('byId')
     
@@ -101,6 +142,9 @@ def get_possible_relationships_of():
 
 @app.route('/get_definition_of', methods=["POST"])
 def get_definition_of():
+    """Get the definition of an ontology entity defined in the ontology.
+    ---
+    """
     data = request.get_json()
     _class= data.get('class')
     
@@ -108,8 +152,11 @@ def get_definition_of():
     definition = resource.definition
     return jsonify({"definition": definition})
 
-@app.route('/createEntity', methods=["POST"])
-def createEntity():
+@app.route('/create_entity', methods=["POST"])
+def create_Entity():
+    """Create a metadata entity on base of a ontology entity.
+    ---
+    """
     data = request.get_json()
     
     label= data.get('label')
@@ -124,8 +171,11 @@ def createEntity():
     else:
         return "Internal Server Error", 500
 
-@app.route('/createRelationship', methods=["POST"])
+@app.route('/create_relationship', methods=["POST"])
 def createRelationship():
+    """Create a relationship between two already existing metadata entities.
+    ---
+    """
     data = request.get_json()
     fromId = data.get('fromId')
     toId = data.get('toId')
@@ -141,8 +191,11 @@ def createRelationship():
         return "Internal Server Error", 500
 
 
-@app.route('/createPropertyBlueprint', methods=["POST"])
+@app.route('/create_property_blueprint', methods=["POST"])
 def createPropertyBlueprint():
+    """Create a proptery blueprint entity on base of a ontology entity.
+    ---
+    """
     data = request.get_json()
     label= data.get('label')
     name = data.get('name')
@@ -156,8 +209,11 @@ def createPropertyBlueprint():
         return "Internal Server Error", 500
 
 
-@app.route('/get_possible_Blueprints', methods=["POST"])
+@app.route('/get_possible_blueprints', methods=["POST"])
 def get_possible_Blueprints():
+    """Get all possible blueprints for a ontology class.
+    ---
+    """
     data = request.get_json()
     className = data.get('class')
    
@@ -166,6 +222,9 @@ def get_possible_Blueprints():
 
 @app.route('/get_blueprint_by_id', methods=["POST"])
 def get_blueprint_by_id():
+    """Get all blueprint information of a id-specified blueprint.
+    ---
+    """
     data = request.get_json()
     _id = data.get('id')
    
