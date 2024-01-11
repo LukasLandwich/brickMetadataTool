@@ -36,6 +36,10 @@ class OntologyAdapter(ABC):
         pass
     
     @abstractmethod
+    def getClassesInRangeOf(self, relationship:OntologyResource) ->[OntologyResource]:
+        pass
+    
+    @abstractmethod
     def isOntologyInitialized(self) -> bool:
         pass
     

@@ -138,6 +138,26 @@ def get_possible_relationships_of():
     return jsonify([r.serialize() for r in relationships])
 
 
+@app.route('/get_entities_in_range_of', methods=["POST"])
+def get_entities_in_range_of():
+    """Get all possible entities in range of the specified relationship type.
+    ---
+    """
+    data = request.get_json()
+    label = data.get('label')
+    rel = brickDict.getReslationship(label)
+    print(rel)
+    
+    classes = brick.getClassesInRangeOf(rel)
+    existingEntities = metadata.getAllExistingEntities()
+    entitiesInRange = []
+    for c in classes: 
+        for e in existingEntities:
+            if c.name == e.resource.name:
+                entitiesInRange.append(e)
+
+    return jsonify([e.serialize() for e in entitiesInRange])
+
     
 
 @app.route('/get_definition_of', methods=["POST"])

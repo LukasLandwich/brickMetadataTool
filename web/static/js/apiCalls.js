@@ -15,6 +15,10 @@ function get_possible_relationships_byId(id, callback) {
   $.post( "/get_possible_relationships_of", JSON.stringify({ id: id, byId: true }), callback);
 }
 
+function get_entities_in_range_of(label, callback) {
+  $.post( "/get_entities_in_range_of", JSON.stringify({ label : label}), callback);
+}
+
 function get_definition_of(className, callback) {
   $.post( "/get_definition_of", JSON.stringify({ class: className }), callback);
 }

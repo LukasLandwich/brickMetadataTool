@@ -168,19 +168,29 @@ function updateRelationshipEntitySelect(data) {
     length = Object.keys(data).length;
     var el1 = $("#relationshipEntityFromSelect");
     el1.empty(); 
-    var el2 = $("#relationshipEntityToSelect");
-    el2.empty(); 
     if (length > 0) {
         buildSelectOption("Select Entity", "", el1)
-        buildSelectOption("Select Entity", "", el2)
         $.each(data, function(key,value) {
             buildSelectOption(value['name'], value['id'], el1)
-            buildSelectOption(value['name'], value['id'], el2)
         });
     }
     else {
-        buildSelectOption("There are no Existing Entities", "", el1)
-        buildSelectOption("There are no Existing Entities", "", el2)
+         buildSelectOption("There are no Existing Entities", "", el1)
+    }
+}
+
+function updateRelationshipEntitySelectTo(data) {
+    length = Object.keys(data).length;
+    var el1 = $("#relationshipEntityToSelect");
+    el1.empty(); 
+    if (length > 0) {
+        buildSelectOption("Select Entity", "", el1)
+        $.each(data, function(key,value) {
+            buildSelectOption(value['name'], value['id'], el1)
+        });
+    }
+    else {
+         buildSelectOption("There are no Existing Entities in Domain of the seletected Entitiy Type", "", el1)
     }
 }
 
@@ -195,6 +205,11 @@ function buildSelectOption(text, value, el) {
 function onRelationshipEntityFromSelectChange() {
     value = $("#relationshipEntityFromSelect").val()
     get_possible_relationships_byId(value, updateRelationshipTypeSelect)
+}
+
+function onRelationshipEntityTypeSelectChange() {
+    value = $("#relationshipTypeSelect").val()
+    get_entities_in_range_of(value, updateRelationshipEntitySelectTo)
 }
 
 function changeEntityCreationMode() {

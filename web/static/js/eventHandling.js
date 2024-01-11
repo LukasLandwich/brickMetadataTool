@@ -15,6 +15,7 @@ $('#addEntityClear').on("click", clearEntityAndPropertyInputs)
 //Change Event Handlers
 $('#switch_existingEntities').on("change", changeEntityCreationMode)
 $('#relationshipEntityFromSelect').on("change", onRelationshipEntityFromSelectChange)
+$('#relationshipTypeSelect').on("change", onRelationshipEntityTypeSelectChange)
 $('#entityTypeSelect').on("change", entityTypeSelectChange)
 $('#addAnotherEntityCheck').on("change", addAnotherEntityCheckChange)
 $('#propertyForm_availableBlueprintsSelect').on("change", onAvailableBlueprintsSelectChange)

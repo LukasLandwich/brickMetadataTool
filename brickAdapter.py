@@ -1,9 +1,10 @@
 from brickResource import BrickResource, BrickClassInstance
-from ontologyResource import OntologyResourceInstance
+from ontologyResource import OntologyResource, OntologyResourceInstance
 from neo4jConnector import Neo4JConnector
 from brickResourceType import BrickResourceType
 from ontologyAdapter import OntologyAdapter
 from quantities import getUnitFor
+from relationshipInverses import getInverse
 
 class BrickAdapter(OntologyAdapter):
        
@@ -101,6 +102,15 @@ class BrickAdapter(OntologyAdapter):
             relationshipList.append(BrickResource(resource["name"] , resource["label"], resource["definition"], resource["uri"], BrickResourceType.RELATIONSHIP))
         return relationshipList
     
+    def getClassesInRangeOf(self, relationship: BrickResource) -> [BrickResource]:
+        inverseName = getInverse(relationship.name)
+        print(inverseName)
+        query = """MATCH (r:n4sch__Relationship)- [:n4sch__DOMAIN] -(pc)<-[:n4sch__SCO*0..10]-(c:n4sch__Class)  where r.n4sch__name='{inverseName}' Return Distinct c.n4sch__name as name, c.n4sch__label as label, c.n4sch__definition as definition, c.uri as uri""".format(inverseName = inverseName)
+        classes = self.db.executeQuery(query, Neo4JConnector.ontologyDatabasePath)
+        classesList = []
+        for resource in classes:
+            classesList.append(BrickResource(resource["name"] , resource["label"], resource["definition"], resource["uri"], BrickResourceType.CLASS))
+        return classesList
     
     #--------------------Ontology Management-----------------
     
