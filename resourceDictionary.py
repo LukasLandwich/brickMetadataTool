@@ -9,6 +9,7 @@ class ResourceDictionaty:
         self.properties = dict(sorted({x.name : x for x in db.getAllProperties()}.items()))
         self.relationships = dict(sorted({x.name : x for x in db.getAllRelationships()}.items()))
         
+        
     def getClass(self, label:str) -> BrickResource:
         return self.classes.get(label)
     
@@ -20,8 +21,22 @@ class ResourceDictionaty:
     def getReslationship(self, name:str) -> OntologyResource:
         return self.relationships.get(name)
     
+    
     def getSortedClasses(self) -> [OntologyResource]:
         classes = [x for x in self.classes.keys()]
         classes = sorted(classes)
         return classes
-   
+    
+        
+    def setupRelationshipsWithout(self, without):
+        self.relationshipsWithout = without
+        rel = self.getReslationship("isPointOf")
+        self.relationshipsWithout.append(rel)
+        rel = self.getReslationship("hasPoint")
+        self.relationshipsWithout.append(rel)
+
+    def isRelationshipWithout(self, name:str) -> bool:
+        if self.relationshipsWithout != None:
+            return [r.name for r in self.relationshipsWithout].__contains__(name)
+        else:
+            return False

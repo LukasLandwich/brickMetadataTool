@@ -112,6 +112,32 @@ class BrickAdapter(OntologyAdapter):
             classesList.append(BrickResource(resource["name"] , resource["label"], resource["definition"], resource["uri"], BrickResourceType.CLASS))
         return classesList
     
+    def getRelationshipsWithNoOutgoingRel(self) -> [BrickResource]:
+        query = "optional MATCH (n:n4sch__Relationship)-[r]->()return n.n4sch__name as name, n.n4sch__label as label, n.n4sch__definition as definition, n.uri as uri"
+        result = self.db.executeQuery(query, Neo4JConnector.ontologyDatabasePath)
+        relationshipsWithRel = []
+        for resource in result:
+            relationshipsWithRel.append(BrickResource(resource["name"] , resource["label"], resource["definition"], resource["uri"], BrickResourceType.RELATIONSHIP))
+            
+        allRelationships = self.getAllRelationships()
+        without = []
+        for rel in allRelationships:
+            found = False
+            for re in relationshipsWithRel:
+                if rel.name == re.name:
+                    found = True
+            if not found:
+               without.append(rel)         
+        
+        for w in without:
+            if w.name in ["ambientTemperatureOfMeasurement", "hasAddress", "deprecationMigitationRule", "aggregationFunction" ]:
+                without.remove(w)
+                
+        
+        del without[3]
+        return without
+        
+        
     #--------------------Ontology Management-----------------
     
     def isOntologyInitialized(self) -> bool:

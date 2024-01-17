@@ -150,6 +150,7 @@ function buildPropertyInput(propertyName, definition, el) {
 
 
 function updateRelationshipTypeSelect(data) {
+    console.log(data)
     length = Object.keys(data).length;
     var el = $("#relationshipTypeSelect");
     el.empty(); 
@@ -239,9 +240,9 @@ function changeEntityCreationMode() {
 }
 
 function submitRelationshipOnExisiting() {
-    fromId = $('#relationshipEntityFromSelect').val()
-    toId = $('#relationshipEntityToSelect').val()
-    relType = $('#relationshipTypeSelect').val()
+    fromId = $('#relationshipEntityFromSelect').text()
+    toId = $('#relationshipEntityToSelect').text()
+    relType = $('#relationshipTypeSelect').text()
     if (fromId == "") {
         showAlertMessage("No entity selected.", "relationshipAlert")
     }

@@ -18,6 +18,8 @@ inverses = {
     "isMeteredBy":"meters",  
     "hasSubMeter": "isSubMeterOf",
     "isSubMeterOf":"hasSubMeter",
+    "hasInputSubstance": "hasOutputSubstance",
+    "hasOutputSubstance": "hasInputSubstance",
 }
 
 def gotInverse(label:str) -> bool:

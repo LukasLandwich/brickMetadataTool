@@ -135,6 +135,9 @@ def get_possible_relationships_of():
         _class= data.get('class')
         
     relationships = brick.getPossibleRelationshipsOf(_class)
+    print(relationships)
+    relationships = relationships+  brickDict.relationshipsWithout
+    print([r.name for r in relationships])
     return jsonify([r.serialize() for r in relationships])
 
 
@@ -146,10 +149,11 @@ def get_entities_in_range_of():
     data = request.get_json()
     label = data.get('label')
     rel = brickDict.getReslationship(label)
-    print(rel)
+    existingEntities = metadata.getAllExistingEntities()
+    if brickDict.isRelationshipWithout(rel.name):
+        return jsonify([e.serialize() for e in existingEntities])
     
     classes = brick.getClassesInRangeOf(rel)
-    existingEntities = metadata.getAllExistingEntities()
     entitiesInRange = []
     for c in classes: 
         for e in existingEntities:
@@ -260,11 +264,11 @@ if __name__ == '__main__':
     
     brick = BrickAdapter(db)
     brickDict = ResourceDictionaty(brick)
+    brickDict.setupRelationshipsWithout(brick.getRelationshipsWithNoOutgoingRel())
     metadata = MetadataAdapter(db, brickDict)
     classesList = [x for x in brickDict.classes.values()]
 
     metadata.getAllExistingEntities()
-
     app.run(debug=True)
     
     brick.db.driver.close()   
